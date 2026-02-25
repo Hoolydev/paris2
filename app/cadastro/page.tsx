@@ -560,6 +560,10 @@ export default function CadastroPage() {
                                     <option value="">Selecione...</option>
 
                                     <optgroup label="Setores Tradicionais">
+                                        <option value="Centro">Centro</option>
+                                        <option value="Setor Sul">Setor Sul</option>
+                                        <option value="Setor Oeste">Setor Oeste</option>
+                                        <option value="São Cristóvão">São Cristóvão</option>
                                         <option value="Boa Vista">Boa Vista</option>
                                         <option value="Carrilho">Carrilho</option>
                                         <option value="Vila Vera Cruz">Vila Vera Cruz</option>
@@ -579,6 +583,15 @@ export default function CadastroPage() {
                                     </optgroup>
 
                                     <optgroup label="Residenciais">
+                                        <option value="Laurentino martins">Laurentino martins</option>
+                                        <option value="Covoá">Covoá</option>
+                                        <option value="Mariana Park">Mariana Park</option>
+                                        <option value="Muniz Falcão">Muniz Falcão</option>
+                                        <option value="Nestor ville">Nestor ville</option>
+                                        <option value="Santa Cecilia">Santa Cecilia</option>
+                                        <option value="Santa Luzia">Santa Luzia</option>
+                                        <option value="Santa Clara">Santa Clara</option>
+                                        <option value="Vereda dos Buritis">Vereda dos Buritis</option>
                                         <option value="Colina Park Residencial">Colina Park Residencial</option>
                                         <option value="Residencial Vereda dos Buritis">Residencial Vereda dos Buritis</option>
                                         <option value="Bouganville">Bouganville</option>
@@ -597,6 +610,7 @@ export default function CadastroPage() {
                                         <option value="Jardim Primavera II">Jardim Primavera II</option>
                                         <option value="Parque das Palmeiras I">Parque das Palmeiras I</option>
                                         <option value="Parque das Palmeiras II">Parque das Palmeiras II</option>
+                                        <option value="Parque das Palmeiras 3">Parque das Palmeiras 3</option>
                                     </optgroup>
 
                                     <optgroup label="Vilas">
