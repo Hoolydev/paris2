@@ -1,0 +1,178 @@
+{
+  "name": "## 02. Baixar e enviar arquivo do Google Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.file_id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        944,
+        720
+      ],
+      "id": "41ac8546-99d1-4aa2-b68d-7e6d9825b059",
+      "name": "Baixar arquivo",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "H3MFyRH1kvygZUk9",
+          "name": "Conta sec v3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "71dda3d7-4505-4d03-b70f-63f5c005c0c3",
+              "name": "resultado",
+              "value": "=ok",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        720
+      ],
+      "id": "47a77506-1481-47de-a170-80d9f2ca8196",
+      "name": "Output"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Gatilho').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Gatilho').item.json.id_conta }}/conversations/{{ $('Gatilho').item.json.id_conversa }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "attachments[]",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1152,
+        720
+      ],
+      "id": "f4c4959b-85d1-4b6a-9ab4-27f6ea908459",
+      "name": "Enviar arquivo",
+      "credentials": {
+        "chatwootApi": {
+          "id": "1MHQFQ90S4g7TbUG",
+          "name": "App- Secv3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "file_id"
+            },
+            {
+              "name": "id_conta"
+            },
+            {
+              "name": "id_conversa"
+            },
+            {
+              "name": "url_chatwoot"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        736,
+        720
+      ],
+      "id": "cce2dfa1-9ec5-482b-a0b5-ae7817b12481",
+      "name": "Gatilho"
+    },
+    {
+      "parameters": {
+        "content": "## Baixar e enviar arquivo",
+        "height": 276,
+        "width": 876,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        624
+      ],
+      "typeVersion": 1,
+      "id": "7545511c-32ed-46a9-8d38-57c83ea16db3",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Baixar arquivo": {
+      "main": [
+        [
+          {
+            "node": "Enviar arquivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar arquivo": {
+      "main": [
+        [
+          {
+            "node": "Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gatilho": {
+      "main": [
+        [
+          {
+            "node": "Baixar arquivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9af0a209-8215-4a91-8044-94cc696c324d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6274adbf735024072c930e045f7537d09565f79aceb00f190f73ec2c27c44ca3"
+  },
+  "id": "2uW0sMosp5UZF2Oe",
+  "tags": []
+}

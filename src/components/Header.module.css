@@ -1,0 +1,137 @@
+.header {
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logoLink {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: auto;
+    max-height: 50px;
+    width: auto;
+}
+
+.desktopNav {
+    display: flex;
+    gap: var(--spacing-xl);
+    align-items: center;
+}
+
+.navLink {
+    color: var(--white);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.navLink::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: width var(--transition-base);
+}
+
+.navLink:hover {
+    color: var(--accent-light);
+}
+
+.navLink:hover::after {
+    width: 100%;
+}
+
+.mobileMenuBtn {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.hamburger {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: var(--white);
+    border-radius: 2px;
+    transition: all var(--transition-base);
+}
+
+.mobileNav {
+    display: none;
+    flex-direction: column;
+    background: var(--primary);
+    padding: var(--spacing-lg);
+    gap: var(--spacing-sm);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mobileNavLink {
+    color: var(--white);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: var(--spacing-sm);
+    transition: all var(--transition-fast);
+    border-radius: var(--radius-sm);
+}
+
+.mobileNavLink:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent-light);
+}
+
+@media (max-width: 768px) {
+    .desktopNav {
+        display: none;
+    }
+
+    .mobileMenuBtn {
+        display: flex;
+    }
+
+    .mobileNav {
+        display: flex;
+    }
+
+    .logo {
+        max-height: 40px;
+    }
+}

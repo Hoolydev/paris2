@@ -1,0 +1,70 @@
+.main {
+    min-height: 100vh;
+}
+
+/* Hero Section */
+.hero {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.heroImageWrapper {
+    position: relative;
+    width: 100%;
+}
+
+.heroImage {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Featured Section */
+.featuredSection {
+    padding: var(--spacing-3xl) 0;
+    background: var(--gray-50);
+}
+
+.sectionHeader {
+    text-align: center;
+    margin-bottom: var(--spacing-3xl);
+}
+
+.sectionTitle {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    color: var(--primary-dark);
+    margin-bottom: var(--spacing-md);
+}
+
+.sectionDescription {
+    font-size: 1.15rem;
+    color: var(--gray-600);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.propertyGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.viewMoreWrapper {
+    text-align: center;
+    margin-top: var(--spacing-2xl);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .propertyGrid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    .sectionTitle {
+        font-size: 2rem;
+    }
+}

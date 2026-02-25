@@ -1,0 +1,102 @@
+.whatsappButton {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    transition: all var(--transition-base);
+    z-index: 999;
+    text-decoration: none;
+    overflow: hidden;
+}
+
+.whatsappButton:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+    width: auto;
+    padding: 0 1.5rem;
+    border-radius: 30px;
+}
+
+.icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.text {
+    display: none;
+    margin-left: 0.75rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1rem;
+    white-space: nowrap;
+}
+
+.whatsappButton:hover .text {
+    display: block;
+    animation: fadeInText 0.3s ease-out;
+}
+
+@keyframes fadeInText {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.7);
+    }
+
+    100% {
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    }
+}
+
+.whatsappButton {
+    animation: pulse 2s infinite;
+}
+
+.whatsappButton:hover {
+    animation: none;
+}
+
+@media (max-width: 768px) {
+    .whatsappButton {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 56px;
+        height: 56px;
+    }
+
+    .icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .whatsappButton:hover {
+        width: 56px;
+        padding: 0;
+        border-radius: 50%;
+    }
+
+    .whatsappButton:hover .text {
+        display: none;
+    }
+}

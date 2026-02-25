@@ -1,0 +1,118 @@
+.footer {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    color: var(--white);
+    padding: var(--spacing-3xl) 0 var(--spacing-xl);
+    margin-top: var(--spacing-3xl);
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-2xl);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--accent);
+    margin-bottom: var(--spacing-sm);
+}
+
+.subtitle {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--accent-light);
+    margin-bottom: var(--spacing-xs);
+}
+
+.description {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.7;
+    font-size: 0.95rem;
+}
+
+.links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.link {
+    color: rgba(255, 255, 255, 0.85);
+    transition: all var(--transition-fast);
+    font-size: 0.95rem;
+}
+
+.link:hover {
+    color: var(--accent-light);
+    padding-left: var(--spacing-xs);
+}
+
+.contactInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.contactItem {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    font-size: 0.9rem;
+}
+
+.contactItem strong {
+    color: var(--accent-light);
+}
+
+.socialLinks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.socialLink {
+    color: rgba(255, 255, 255, 0.85);
+    transition: all var(--transition-fast);
+    font-size: 0.95rem;
+    padding: var(--spacing-xs) 0;
+}
+
+.socialLink:hover {
+    color: var(--accent-light);
+    padding-left: var(--spacing-xs);
+}
+
+.bottom {
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.copyright {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    .footer {
+        padding: var(--spacing-2xl) 0 var(--spacing-lg);
+    }
+}

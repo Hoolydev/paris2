@@ -1,0 +1,175 @@
+.main {
+    min-height: 100vh;
+}
+
+.pageHeader {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    color: var(--white);
+    padding: var(--spacing-3xl) 0;
+    text-align: center;
+}
+
+.pageTitle {
+    font-family: var(--font-display);
+    font-size: 2.75rem;
+    color: var(--white);
+    margin-bottom: var(--spacing-md);
+}
+
+.pageDescription {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.content {
+    padding: var(--spacing-3xl) 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: var(--spacing-3xl);
+}
+
+.sectionTitle {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--primary-dark);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* Info Section */
+.infoSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.contactInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.contactItem {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+    padding: var(--spacing-lg);
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+}
+
+.contactItem:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateX(4px);
+}
+
+.contactIcon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.contactLabel {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.contactValue {
+    color: var(--gray-700);
+    line-height: 1.6;
+}
+
+.hoursBox {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.hoursTitle {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--primary-dark);
+    margin-bottom: var(--spacing-sm);
+}
+
+.hoursText {
+    color: var(--primary-dark);
+    font-weight: 500;
+    line-height: 1.8;
+}
+
+/* Form Section */
+.formSection {
+    background: var(--white);
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.label {
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 0.95rem;
+}
+
+.input,
+.select,
+.textarea {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    transition: all var(--transition-fast);
+    background: var(--white);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1);
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+@media (max-width: 968px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pageTitle {
+        font-size: 2rem;
+    }
+
+    .sectionTitle {
+        font-size: 1.65rem;
+    }
+
+    .formSection {
+        padding: var(--spacing-xl);
+    }
+}
