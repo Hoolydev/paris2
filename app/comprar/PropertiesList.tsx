@@ -31,6 +31,44 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
         bedrooms: '',
     });
 
+    const filteredProperties = properties.filter((property) => {
+        let matches = true;
+
+        // Filter by Type
+        if (filters.type && property.type.toLowerCase() !== filters.type.toLowerCase()) {
+            matches = false;
+        }
+
+        // Filter by Location
+        if (filters.location && property.location.toLowerCase() !== filters.location.toLowerCase()) {
+            matches = false;
+        }
+
+        // Filter by Bedrooms
+        if (filters.bedrooms) {
+            if (filters.bedrooms === '4+') {
+                if (property.bedrooms < 4) matches = false;
+            } else {
+                if (property.bedrooms !== parseInt(filters.bedrooms)) matches = false;
+            }
+        }
+
+        // Filter by Price Range
+        if (filters.priceRange) {
+            // Remove non-numeric characters before parsing (accounting for potential formatted strings)
+            // But properties might have price as pure number string or formatted.
+            // Let's assume it's a numeric string like "410000" because of formatPrice in PropertyCard handling it.
+            const priceNum = Number(property.price);
+            if (!isNaN(priceNum)) {
+                if (filters.priceRange === '0-300k' && priceNum > 300000) matches = false;
+                if (filters.priceRange === '300k-800k' && (priceNum <= 300000 || priceNum > 800000)) matches = false;
+                if (filters.priceRange === '800k+' && priceNum <= 800000) matches = false;
+            }
+        }
+
+        return matches;
+    });
+
     return (
         <div className={styles.content}>
             <div className="container-wide">
@@ -155,15 +193,15 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
 
                     {/* Conteúdo Principal */}
                     <div className={styles.mainContent}>
-                        {properties.length === 0 ? (
+                        {filteredProperties.length === 0 ? (
                             <p style={{ textAlign: 'center', color: '#666', padding: '40px 0' }}>
-                                Nenhum imóvel cadastrado ainda.
+                                Nenhum imóvel encontrado com estes filtros.
                             </p>
                         ) : (
                             <section className={styles.categorySection}>
-                                <h2 className={styles.categoryTitle}>Todos os Imóveis</h2>
+                                <h2 className={styles.categoryTitle}>Imóveis Encontrados ({filteredProperties.length})</h2>
                                 <div className={styles.propertyGrid}>
-                                    {properties.map((property) => (
+                                    {filteredProperties.map((property) => (
                                         <PropertyCard key={property.id} {...property} />
                                     ))}
                                 </div>

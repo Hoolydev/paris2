@@ -17,7 +17,7 @@
 .imageWrapper {
     position: relative;
     width: 100%;
-    height: 240px;
+    aspect-ratio: 4 / 5;
     overflow: hidden;
 }
 
@@ -123,9 +123,7 @@
 }
 
 @media (max-width: 768px) {
-    .imageWrapper {
-        height: 200px;
-    }
+    /* removed imageWrapper height override to maintain aspect-ratio */
 
     .content {
         padding: var(--spacing-md);
