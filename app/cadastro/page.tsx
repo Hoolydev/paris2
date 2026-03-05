@@ -9,6 +9,7 @@ interface Property {
     id: string;
     title: string;
     type: string;
+    categories?: string[]; // Novo campo para múltiplas categorias
     price: string;
     image: string;
     images?: string[];
@@ -34,6 +35,7 @@ export default function CadastroPage() {
     const [formData, setFormData] = useState({
         title: '',
         type: '',
+        categories: [] as string[], // Novo campo para múltiplas categorias
         price: '',
         location: '',
         neighborhood: '',
@@ -66,6 +68,14 @@ export default function CadastroPage() {
     const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const formatted = formatPrice(e.target.value);
         setFormData({ ...formData, price: formatted });
+    };
+
+    // Função para lidar com checkboxes de categorias
+    const handleCategoryChange = (category: string, checked: boolean) => {
+        const newCategories = checked
+            ? [...formData.categories, category]
+            : formData.categories.filter(cat => cat !== category);
+        setFormData({ ...formData, categories: newCategories });
     };
 
     useEffect(() => {
@@ -184,7 +194,8 @@ export default function CadastroPage() {
                 location: formData.location,
                 neighborhood: formData.neighborhood,
                 code: formData.code,
-                features: formData.features.split(',').map(f => f.trim()).filter(f => f !== '')
+                type: formData.categories[0] || 'Casa', // Tipo principal (primeira categoria)
+                features: [...formData.categories, ...formData.features.split(',').map(f => f.trim()).filter(f => f !== '')]
             };
 
             const url = editingId ? `/api/properties?id=${editingId}` : '/api/properties';
@@ -216,6 +227,7 @@ export default function CadastroPage() {
         setFormData({
             title: property.title,
             type: property.type,
+            categories: property.features?.filter(f => ['Casa', 'Apartamento', 'Terreno', 'Zona Rural', 'Minha Casa Minha Vida', 'Alto Padrão'].includes(f)) || [property.type],
             price: property.price,
             location: property.location,
             neighborhood: property.neighborhood || '',
@@ -228,7 +240,7 @@ export default function CadastroPage() {
             landArea: property.landArea || '',
             builtArea: property.builtArea || '',
             description: property.description,
-            features: property.features?.join(', ') || ''
+            features: property.features?.filter(f => !['Casa', 'Apartamento', 'Terreno', 'Zona Rural', 'Minha Casa Minha Vida', 'Alto Padrão'].includes(f)).join(', ') || ''
         });
         setExistingImages(property.images || [property.image || '']);
         setFeaturedImageIndex(0);
@@ -243,6 +255,7 @@ export default function CadastroPage() {
         setFormData({
             title: '',
             type: '',
+            categories: [],
             price: '',
             location: '',
             neighborhood: '',
@@ -345,21 +358,66 @@ export default function CadastroPage() {
                         </div>
 
                         <div className={styles.formGroup}>
-                            <label className={styles.label}>Tipo</label>
-                            <select
-                                value={formData.type}
-                                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                className={styles.input}
-                                required
-                            >
-                                <option value="">Selecione...</option>
-                                <option value="Casa">Casa</option>
-                                <option value="Apartamento">Apartamento</option>
-                                <option value="Terreno">Terreno</option>
-                                <option value="Zona Rural">Zona Rural</option>
-                                <option value="Minha Casa Minha Vida">Minha Casa Minha Vida</option>
-                                <option value="Alto Padrão">Alto Padrão</option>
-                            </select>
+                            <label className={styles.label}>Categorias do Imóvel</label>
+                            <div className={styles.categoriesContainer}>
+                                <div className={styles.categoryOption}>
+                                    <input
+                                        type="checkbox"
+                                        id="casa"
+                                        checked={formData.categories.includes('Casa')}
+                                        onChange={(e) => handleCategoryChange('Casa', e.target.checked)}
+                                    />
+                                    <label htmlFor="casa" className={styles.categoryLabel}>Casa</label>
+                                </div>
+                                <div className={styles.categoryOption}>
+                                    <input
+                                        type="checkbox"
+                                        id="apartamento"
+                                        checked={formData.categories.includes('Apartamento')}
+                                        onChange={(e) => handleCategoryChange('Apartamento', e.target.checked)}
+                                    />
+                                    <label htmlFor="apartamento" className={styles.categoryLabel}>Apartamento</label>
+                                </div>
+                                <div className={styles.categoryOption}>
+                                    <input
+                                        type="checkbox"
+                                        id="terreno"
+                                        checked={formData.categories.includes('Terreno')}
+                                        onChange={(e) => handleCategoryChange('Terreno', e.target.checked)}
+                                    />
+                                    <label htmlFor="terreno" className={styles.categoryLabel}>Terreno</label>
+                                </div>
+                                <div className={styles.categoryOption}>
+                                    <input
+                                        type="checkbox"
+                                        id="zona-rural"
+                                        checked={formData.categories.includes('Zona Rural')}
+                                        onChange={(e) => handleCategoryChange('Zona Rural', e.target.checked)}
+                                    />
+                                    <label htmlFor="zona-rural" className={styles.categoryLabel}>Zona Rural</label>
+                                </div>
+                                <div className={styles.categoryOption}>
+                                    <input
+                                        type="checkbox"
+                                        id="minha-casa"
+                                        checked={formData.categories.includes('Minha Casa Minha Vida')}
+                                        onChange={(e) => handleCategoryChange('Minha Casa Minha Vida', e.target.checked)}
+                                    />
+                                    <label htmlFor="minha-casa" className={styles.categoryLabel}>Minha Casa Minha Vida</label>
+                                </div>
+                                <div className={styles.categoryOption}>
+                                    <input
+                                        type="checkbox"
+                                        id="alto-padrao"
+                                        checked={formData.categories.includes('Alto Padrão')}
+                                        onChange={(e) => handleCategoryChange('Alto Padrão', e.target.checked)}
+                                    />
+                                    <label htmlFor="alto-padrao" className={styles.categoryLabel}>Alto Padrão</label>
+                                </div>
+                            </div>
+                            {formData.categories.length === 0 && (
+                                <p className={styles.categoryRequired}>Selecione pelo menos uma categoria</p>
+                            )}
                         </div>
 
                         <div className={styles.formGroup}>

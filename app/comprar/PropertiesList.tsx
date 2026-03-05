@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropertyCard from '@/components/PropertyCard';
 import styles from './page.module.css';
 
@@ -25,44 +25,76 @@ interface PropertiesListProps {
 
 export default function PropertiesList({ properties }: PropertiesListProps) {
     const [filters, setFilters] = useState({
-        type: '',
+        categories: [] as string[], // Mudança de 'type' para 'categories'
         priceRange: '',
         location: '',
         bedrooms: '',
     });
+    const [appliedFilters, setAppliedFilters] = useState(filters);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Apply filters with a small delay to show loading state
+    const applyFilters = () => {
+        setIsLoading(true);
+        setTimeout(() => {
+            setAppliedFilters(filters);
+            setIsLoading(false);
+        }, 300);
+    };
+
+    // Auto-apply filters when any filter changes (existing behavior)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setAppliedFilters(filters);
+        }, 500); // Small delay to prevent excessive re-renders
+
+        return () => clearTimeout(timer);
+    }, [filters]);
 
     const filteredProperties = properties.filter((property) => {
         let matches = true;
 
-        // Filter by Type
-        if (filters.type && property.type.toLowerCase() !== filters.type.toLowerCase()) {
-            matches = false;
+        // Filter by Categories - verifica se o imóvel tem pelo menos uma das categorias selecionadas
+        if (appliedFilters.categories.length > 0) {
+            const propertyCategories = property.features?.filter(f => 
+                ['Casa', 'Apartamento', 'Terreno', 'Zona Rural', 'Minha Casa Minha Vida', 'Alto Padrão'].includes(f)
+            ) || [property.type];
+            
+            const hasMatchingCategory = appliedFilters.categories.some(filterCat => 
+                propertyCategories.some(propCat => 
+                    propCat.toLowerCase() === filterCat.toLowerCase()
+                )
+            );
+            
+            if (!hasMatchingCategory) {
+                matches = false;
+            }
         }
 
         // Filter by Location
-        if (filters.location && property.location.toLowerCase() !== filters.location.toLowerCase()) {
+        if (appliedFilters.location && property.location.toLowerCase() !== appliedFilters.location.toLowerCase()) {
             matches = false;
         }
 
         // Filter by Bedrooms
-        if (filters.bedrooms) {
-            if (filters.bedrooms === '4+') {
+        if (appliedFilters.bedrooms) {
+            if (appliedFilters.bedrooms === '4+') {
                 if (property.bedrooms < 4) matches = false;
             } else {
-                if (property.bedrooms !== parseInt(filters.bedrooms)) matches = false;
+                if (property.bedrooms !== parseInt(appliedFilters.bedrooms)) matches = false;
             }
         }
 
         // Filter by Price Range
-        if (filters.priceRange) {
+        if (appliedFilters.priceRange) {
             // Remove non-numeric characters before parsing (accounting for potential formatted strings)
             // But properties might have price as pure number string or formatted.
             // Let's assume it's a numeric string like "410000" because of formatPrice in PropertyCard handling it.
             const priceNum = Number(property.price);
             if (!isNaN(priceNum)) {
-                if (filters.priceRange === '0-300k' && priceNum > 300000) matches = false;
-                if (filters.priceRange === '300k-800k' && (priceNum <= 300000 || priceNum > 800000)) matches = false;
-                if (filters.priceRange === '800k+' && priceNum <= 800000) matches = false;
+                if (appliedFilters.priceRange === '0-300k' && priceNum > 300000) matches = false;
+                if (appliedFilters.priceRange === '300k-800k' && (priceNum <= 300000 || priceNum > 800000)) matches = false;
+                if (appliedFilters.priceRange === '800k+' && priceNum <= 800000) matches = false;
             }
         }
 
@@ -77,22 +109,102 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
                     <aside className={styles.sidebar}>
                         <div className={styles.filterBox}>
                             <h3 className={styles.filterTitle}>Filtros</h3>
+                            
+                            {/* Contador de filtros ativos */}
+                            {(appliedFilters.categories.length + 
+                              (appliedFilters.priceRange ? 1 : 0) + 
+                              (appliedFilters.location ? 1 : 0) + 
+                              (appliedFilters.bedrooms ? 1 : 0)) > 0 && (
+                                <div className={styles.activeFiltersCount}>
+                                    {(appliedFilters.categories.length + 
+                                      (appliedFilters.priceRange ? 1 : 0) + 
+                                      (appliedFilters.location ? 1 : 0) + 
+                                      (appliedFilters.bedrooms ? 1 : 0))} filtro(s) ativo(s)
+                                </div>
+                            )}
 
                             <div className={styles.filterGroup}>
-                                <label className={styles.filterLabel}>Tipo de Imóvel</label>
-                                <select
-                                    className={styles.filterSelect}
-                                    value={filters.type}
-                                    onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                                >
-                                    <option value="">Todos</option>
-                                    <option value="casa">Casa</option>
-                                    <option value="apartamento">Apartamento</option>
-                                    <option value="terreno">Terreno</option>
-                                    <option value="zona rural">Zona Rural</option>
-                                    <option value="minha casa minha vida">Minha Casa Minha Vida</option>
-                                    <option value="alto padrão">Alto Padrão</option>
-                                </select>
+                                <label className={styles.filterLabel}>Categorias do Imóvel</label>
+                                <div className={styles.categoryFilters}>
+                                    <label className={styles.checkboxLabel}>
+                                        <input
+                                            type="checkbox"
+                                            checked={filters.categories.includes('Casa')}
+                                            onChange={(e) => {
+                                                const newCategories = e.target.checked
+                                                    ? [...filters.categories, 'Casa']
+                                                    : filters.categories.filter(cat => cat !== 'Casa');
+                                                setFilters({ ...filters, categories: newCategories });
+                                            }}
+                                        />
+                                        Casa
+                                    </label>
+                                    <label className={styles.checkboxLabel}>
+                                        <input
+                                            type="checkbox"
+                                            checked={filters.categories.includes('Apartamento')}
+                                            onChange={(e) => {
+                                                const newCategories = e.target.checked
+                                                    ? [...filters.categories, 'Apartamento']
+                                                    : filters.categories.filter(cat => cat !== 'Apartamento');
+                                                setFilters({ ...filters, categories: newCategories });
+                                            }}
+                                        />
+                                        Apartamento
+                                    </label>
+                                    <label className={styles.checkboxLabel}>
+                                        <input
+                                            type="checkbox"
+                                            checked={filters.categories.includes('Terreno')}
+                                            onChange={(e) => {
+                                                const newCategories = e.target.checked
+                                                    ? [...filters.categories, 'Terreno']
+                                                    : filters.categories.filter(cat => cat !== 'Terreno');
+                                                setFilters({ ...filters, categories: newCategories });
+                                            }}
+                                        />
+                                        Terreno
+                                    </label>
+                                    <label className={styles.checkboxLabel}>
+                                        <input
+                                            type="checkbox"
+                                            checked={filters.categories.includes('Zona Rural')}
+                                            onChange={(e) => {
+                                                const newCategories = e.target.checked
+                                                    ? [...filters.categories, 'Zona Rural']
+                                                    : filters.categories.filter(cat => cat !== 'Zona Rural');
+                                                setFilters({ ...filters, categories: newCategories });
+                                            }}
+                                        />
+                                        Zona Rural
+                                    </label>
+                                    <label className={styles.checkboxLabel}>
+                                        <input
+                                            type="checkbox"
+                                            checked={filters.categories.includes('Minha Casa Minha Vida')}
+                                            onChange={(e) => {
+                                                const newCategories = e.target.checked
+                                                    ? [...filters.categories, 'Minha Casa Minha Vida']
+                                                    : filters.categories.filter(cat => cat !== 'Minha Casa Minha Vida');
+                                                setFilters({ ...filters, categories: newCategories });
+                                            }}
+                                        />
+                                        Minha Casa Minha Vida
+                                    </label>
+                                    <label className={styles.checkboxLabel}>
+                                        <input
+                                            type="checkbox"
+                                            checked={filters.categories.includes('Alto Padrão')}
+                                            onChange={(e) => {
+                                                const newCategories = e.target.checked
+                                                    ? [...filters.categories, 'Alto Padrão']
+                                                    : filters.categories.filter(cat => cat !== 'Alto Padrão');
+                                                setFilters({ ...filters, categories: newCategories });
+                                            }}
+                                        />
+                                        Alto Padrão
+                                    </label>
+                                </div>
                             </div>
 
                             <div className={styles.filterGroup}>
@@ -182,21 +294,47 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
                                 </select>
                             </div>
 
-                            <button
-                                className={styles.clearButton}
-                                onClick={() => setFilters({ type: '', priceRange: '', location: '', bedrooms: '' })}
-                            >
-                                Limpar Filtros
-                            </button>
+                            <div className={styles.filterActions}>
+                                <button
+                                    className={styles.applyButton}
+                                    onClick={applyFilters}
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? 'Aplicando...' : 'Aplicar Filtros'}
+                                </button>
+                                <button
+                                    className={styles.clearButton}
+                                    onClick={() => {
+                                        setFilters({ categories: [], priceRange: '', location: '', bedrooms: '' });
+                                        setAppliedFilters({ categories: [], priceRange: '', location: '', bedrooms: '' });
+                                    }}
+                                >
+                                    Limpar Filtros
+                                </button>
+                            </div>
                         </div>
                     </aside>
 
                     {/* Conteúdo Principal */}
                     <div className={styles.mainContent}>
+                        {isLoading && (
+                            <div className={styles.loadingMessage}>
+                                <p>Aplicando filtros...</p>
+                            </div>
+                        )}
                         {filteredProperties.length === 0 ? (
-                            <p style={{ textAlign: 'center', color: '#666', padding: '40px 0' }}>
-                                Nenhum imóvel encontrado com estes filtros.
-                            </p>
+                            <div className={styles.noResults}>
+                                <p>Nenhum imóvel encontrado com estes filtros.</p>
+                                <button 
+                                    className={styles.clearButton}
+                                    onClick={() => {
+                                        setFilters({ categories: [], priceRange: '', location: '', bedrooms: '' });
+                                        setAppliedFilters({ categories: [], priceRange: '', location: '', bedrooms: '' });
+                                    }}
+                                >
+                                    Limpar todos os filtros
+                                </button>
+                            </div>
                         ) : (
                             <section className={styles.categorySection}>
                                 <h2 className={styles.categoryTitle}>Imóveis Encontrados ({filteredProperties.length})</h2>

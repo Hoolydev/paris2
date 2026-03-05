@@ -204,6 +204,53 @@ textarea.input {
     color: #666;
 }
 
+/* Estilos para as checkboxes de categorias */
+.categoriesContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.categoryOption {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f9f9f9;
+    transition: all 0.3s;
+}
+
+.categoryOption:hover {
+    background: #f0f0f0;
+    border-color: #ccc;
+}
+
+.categoryOption input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.categoryLabel {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+
+.categoryRequired {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
 @media (max-width: 1024px) {
     .content {
         grid-template-columns: 1fr;

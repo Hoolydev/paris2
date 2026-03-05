@@ -10,6 +10,7 @@ export interface Property {
     id: string;
     title: string;
     type: string;
+    categories?: string[]; // Novo campo para múltiplas categorias
     price: string;
     image?: string;
     images?: string[];
@@ -98,7 +99,8 @@ export async function saveProperty(property: Property): Promise<Property | null>
             land_area: rest.landArea,
             built_area: rest.builtArea,
             description: rest.description,
-            features: rest.features || []
+            features: rest.features || [],
+            categories: rest.categories || []
             // We let DB generate ID
         };
 
