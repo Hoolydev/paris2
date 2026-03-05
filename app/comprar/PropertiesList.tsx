@@ -8,6 +8,7 @@ interface Property {
     id: string;
     title: string;
     type: string;
+    categories?: string[];
     price: string;
     image?: string;
     images?: string[];
@@ -56,9 +57,8 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
 
         // Filter by Categories - verifica se o imóvel tem pelo menos uma das categorias selecionadas
         if (appliedFilters.categories.length > 0) {
-            const propertyCategories = property.features?.filter(f => 
-                ['Casa', 'Apartamento', 'Terreno', 'Zona Rural', 'Minha Casa Minha Vida', 'Alto Padrão'].includes(f)
-            ) || [property.type];
+            // Usa as categorias do imóvel (se existirem) ou o tipo como fallback
+            const propertyCategories = property.categories || [property.type];
             
             const hasMatchingCategory = appliedFilters.categories.some(filterCat => 
                 propertyCategories.some(propCat => 
