@@ -101,14 +101,24 @@ export async function saveProperty(property: Property): Promise<Property | null>
             description: rest.description,
             features: rest.features || [],
             categories: rest.categories || []
-            // We let DB generate ID
         };
 
-        const { data, error } = await supabase
+        let { data, error } = await supabase
             .from('properties')
             .insert([dbProperty])
             .select()
             .single();
+
+        if (error && error.code === 'PGRST204' && error.message?.includes("'categories'")) {
+            const { categories, ...dbPropertyWithoutCategories } = dbProperty;
+            const retry = await supabase
+                .from('properties')
+                .insert([dbPropertyWithoutCategories])
+                .select()
+                .single();
+            data = retry.data;
+            error = retry.error;
+        }
 
         if (error) {
             console.error('Error saving property to Supabase:', error);
@@ -152,13 +162,26 @@ export async function updateProperty(id: string, property: Partial<Property>): P
         if (rest.builtArea !== undefined) dbProperty.built_area = rest.builtArea;
         if (rest.description !== undefined) dbProperty.description = rest.description;
         if (rest.features !== undefined) dbProperty.features = rest.features || [];
+        if (rest.categories !== undefined) dbProperty.categories = rest.categories || [];
 
-        const { data, error } = await supabase
+        let { data, error } = await supabase
             .from('properties')
             .update(dbProperty)
             .eq('id', id)
             .select()
             .single();
+
+        if (error && error.code === 'PGRST204' && error.message?.includes("'categories'")) {
+            const { categories, ...dbPropertyWithoutCategories } = dbProperty;
+            const retry = await supabase
+                .from('properties')
+                .update(dbPropertyWithoutCategories)
+                .eq('id', id)
+                .select()
+                .single();
+            data = retry.data;
+            error = retry.error;
+        }
 
         if (error) {
             console.error('Error updating property in Supabase:', error);

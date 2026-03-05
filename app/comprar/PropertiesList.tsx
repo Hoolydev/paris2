@@ -34,6 +34,12 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
     const [appliedFilters, setAppliedFilters] = useState(filters);
     const [isLoading, setIsLoading] = useState(false);
 
+    const parsePriceToNumber = (value: string): number => {
+        const digits = value.replace(/\D/g, '');
+        if (!digits) return NaN;
+        return Number(digits);
+    };
+
     // Apply filters with a small delay to show loading state
     const applyFilters = () => {
         setIsLoading(true);
@@ -87,14 +93,13 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
 
         // Filter by Price Range
         if (appliedFilters.priceRange) {
-            // Remove non-numeric characters before parsing (accounting for potential formatted strings)
-            // But properties might have price as pure number string or formatted.
-            // Let's assume it's a numeric string like "410000" because of formatPrice in PropertyCard handling it.
-            const priceNum = Number(property.price);
+            const priceNum = parsePriceToNumber(property.price);
             if (!isNaN(priceNum)) {
                 if (appliedFilters.priceRange === '0-300k' && priceNum > 300000) matches = false;
                 if (appliedFilters.priceRange === '300k-800k' && (priceNum <= 300000 || priceNum > 800000)) matches = false;
                 if (appliedFilters.priceRange === '800k+' && priceNum <= 800000) matches = false;
+            } else {
+                matches = false;
             }
         }
 
