@@ -13,6 +13,7 @@ interface Property {
     image?: string;
     images?: string[];
     location: string;
+    neighborhood?: string;
     bedrooms: number;
     suites?: number;
     area: string;
@@ -39,6 +40,13 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
         if (!digits) return NaN;
         return Number(digits);
     };
+
+    const normalizeText = (value: string): string =>
+        value
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim()
+            .toLowerCase();
 
     // Apply filters with a small delay to show loading state
     const applyFilters = () => {
@@ -78,8 +86,24 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
         }
 
         // Filter by Location
-        if (appliedFilters.location && property.location.toLowerCase() !== appliedFilters.location.toLowerCase()) {
-            matches = false;
+        if (appliedFilters.location) {
+            const selectedNeighborhood = normalizeText(appliedFilters.location);
+            const propertyNeighborhood = normalizeText(property.neighborhood || '');
+            const propertyLocation = normalizeText(property.location || '');
+
+            const matchesNeighborhood =
+                propertyNeighborhood === selectedNeighborhood ||
+                propertyNeighborhood.includes(selectedNeighborhood) ||
+                selectedNeighborhood.includes(propertyNeighborhood);
+
+            const matchesLocation =
+                propertyLocation === selectedNeighborhood ||
+                propertyLocation.includes(selectedNeighborhood) ||
+                selectedNeighborhood.includes(propertyLocation);
+
+            if (!matchesNeighborhood && !matchesLocation) {
+                matches = false;
+            }
         }
 
         // Filter by Bedrooms
