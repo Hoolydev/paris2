@@ -1,4 +1,6 @@
-import Image from 'next/image';
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import styles from './PropertyCard.module.css';
 
@@ -25,7 +27,7 @@ export default function PropertyCard({
     type,
     price,
     image,
-    images, // Destructure images
+    images,
     location,
     bedrooms,
     suites,
@@ -33,8 +35,8 @@ export default function PropertyCard({
     landArea,
     builtArea
 }: PropertyCardProps) {
-    // Determine which image to show
-    const displayImage = (images && images.length > 0) ? images[0] : (image || '/placeholder-image.jpg');
+    const initialImage = (images && images.length > 0) ? images[0] : (image || '');
+    const [imgSrc, setImgSrc] = useState(initialImage);
 
     // Format price
     const formatPrice = (priceStr: string) => {
@@ -48,13 +50,16 @@ export default function PropertyCard({
     return (
         <div className={styles.card}>
             <div className={styles.imageWrapper}>
-                <Image
-                    src={displayImage} // Use displayImage
-                    alt={title}
-                    width={800}
-                    height={600}
-                    className={styles.image}
-                />
+                {imgSrc ? (
+                    <img
+                        src={imgSrc}
+                        alt={title}
+                        className={styles.image}
+                        onError={() => setImgSrc('')}
+                    />
+                ) : (
+                    <div className={styles.imagePlaceholder} />
+                )}
                 <div className={styles.badge}>{type}</div>
             </div>
 
