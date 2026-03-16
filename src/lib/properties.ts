@@ -255,7 +255,7 @@ export async function getSimilarProperties(type: string, location: string, curre
             .from('properties')
             .select('*')
             .neq('id', currentId)
-            .or(`type.eq.${type},location.eq.${location}`)
+            .or(`type.eq."${type}",location.eq."${location}"`)
             .limit(4);
 
         if (error) {

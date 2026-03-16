@@ -165,6 +165,12 @@ export default function CadastroPage() {
                     if (uploadResponse.ok) {
                         const uploadData = await uploadResponse.json();
                         imageUrls.push(uploadData.url);
+                    } else {
+                        const errorData = await uploadResponse.json().catch(() => ({}));
+                        const msg = errorData.error || `Erro HTTP ${uploadResponse.status}`;
+                        alert(`Erro ao fazer upload da imagem "${file.name}": ${msg}`);
+                        setUploading(false);
+                        return;
                     }
                 }
             }
