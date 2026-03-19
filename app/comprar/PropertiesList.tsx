@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PropertyCard from '@/components/PropertyCard';
 import styles from './page.module.css';
 
@@ -42,6 +42,16 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
         if (!digits) return NaN;
         return Number(digits);
     };
+
+    const formatPrice = (value: number): string =>
+        value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+    const priceOptions = useMemo(() => {
+        const nums = properties
+            .map(p => parsePriceToNumber(p.price))
+            .filter(n => !isNaN(n) && n > 0);
+        return [...new Set(nums)].sort((a, b) => a - b);
+    }, [properties]);
 
     const normalizeText = (value: string): string =>
         value
@@ -266,23 +276,27 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
                             <div className={styles.filterGroup}>
                                 <label className={styles.filterLabel}>Faixa de Preço</label>
                                 <div className={styles.priceRangeRow}>
-                                    <input
-                                        type="number"
-                                        className={styles.filterInput}
-                                        placeholder="De R$"
-                                        min={0}
+                                    <select
+                                        className={styles.filterSelect}
                                         value={filters.priceMin}
                                         onChange={(e) => setFilters({ ...filters, priceMin: e.target.value })}
-                                    />
+                                    >
+                                        <option value="">De</option>
+                                        {priceOptions.map(p => (
+                                            <option key={p} value={String(p)}>{formatPrice(p)}</option>
+                                        ))}
+                                    </select>
                                     <span className={styles.priceRangeSep}>–</span>
-                                    <input
-                                        type="number"
-                                        className={styles.filterInput}
-                                        placeholder="Até R$"
-                                        min={0}
+                                    <select
+                                        className={styles.filterSelect}
                                         value={filters.priceMax}
                                         onChange={(e) => setFilters({ ...filters, priceMax: e.target.value })}
-                                    />
+                                    >
+                                        <option value="">Até</option>
+                                        {priceOptions.map(p => (
+                                            <option key={p} value={String(p)}>{formatPrice(p)}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 

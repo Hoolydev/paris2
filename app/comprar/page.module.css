@@ -111,7 +111,8 @@
     gap: var(--spacing-xs);
 }
 
-.priceRangeRow .filterInput {
+.priceRangeRow .filterInput,
+.priceRangeRow .filterSelect {
     width: 0;
     flex: 1;
 }
