@@ -52,7 +52,6 @@ export default function ImageModal({ images, initialIndex, isOpen, onClose }: Im
                         src={images[currentIndex]}
                         alt={`Image ${currentIndex + 1}`}
                         className={styles.image}
-                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />
                 </div>
 

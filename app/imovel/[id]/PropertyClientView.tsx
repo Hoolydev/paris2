@@ -66,10 +66,9 @@ export default function PropertyClientView({ property }: PropertyClientViewProps
                             alt={property.title}
                             className={styles.image}
                             onError={() => handleImageError(0)}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
+                                                    />
                     ) : (
-                        <div className={styles.imagePlaceholder} style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', fontSize: '1rem' }}>
+                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', fontSize: '1rem' }}>
                             Imagem indisponível
                         </div>
                     )}
@@ -84,10 +83,9 @@ export default function PropertyClientView({ property }: PropertyClientViewProps
                                     alt={`${property.title} - 2`}
                                     className={styles.image}
                                     onError={() => handleImageError(1)}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                />
+                                                                    />
                             ) : (
-                                <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)' }} />
+                                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)' }} />
                             )}
                         </div>
                     )}
@@ -101,10 +99,9 @@ export default function PropertyClientView({ property }: PropertyClientViewProps
                                         alt={`${property.title} - 3`}
                                         className={styles.image}
                                         onError={() => handleImageError(2)}
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    />
+                                                                            />
                                 ) : (
-                                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)' }} />
+                                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)' }} />
                                 )}
                             </div>
                         )}
@@ -116,10 +113,9 @@ export default function PropertyClientView({ property }: PropertyClientViewProps
                                         alt={`${property.title} - 4`}
                                         className={styles.image}
                                         onError={() => handleImageError(3)}
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    />
+                                                                            />
                                 ) : (
-                                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)' }} />
+                                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)' }} />
                                 )}
                                 {allImages.length > 4 && (
                                     <div className={styles.moreOverlay}>
