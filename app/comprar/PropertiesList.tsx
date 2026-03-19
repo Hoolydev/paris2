@@ -29,7 +29,8 @@ interface PropertiesListProps {
 export default function PropertiesList({ properties }: PropertiesListProps) {
     const [filters, setFilters] = useState({
         categories: [] as string[], // Mudança de 'type' para 'categories'
-        priceRange: '',
+        priceMin: '',
+        priceMax: '',
         location: '',
         bedrooms: '',
     });
@@ -141,15 +142,14 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
         }
 
         // Filter by Price Range
-        if (appliedFilters.priceRange) {
-            const priceNum = parsePriceToNumber(property.price);
-            if (!isNaN(priceNum)) {
-                if (appliedFilters.priceRange === '0-300k' && priceNum > 300000) matches = false;
-                if (appliedFilters.priceRange === '300k-800k' && (priceNum <= 300000 || priceNum > 800000)) matches = false;
-                if (appliedFilters.priceRange === '800k+' && priceNum <= 800000) matches = false;
-            } else {
-                matches = false;
-            }
+        const priceNum = parsePriceToNumber(property.price);
+        if (appliedFilters.priceMin) {
+            const min = Number(appliedFilters.priceMin.replace(/\D/g, ''));
+            if (isNaN(priceNum) || priceNum < min) matches = false;
+        }
+        if (appliedFilters.priceMax) {
+            const max = Number(appliedFilters.priceMax.replace(/\D/g, ''));
+            if (isNaN(priceNum) || priceNum > max) matches = false;
         }
 
         return matches;
@@ -165,14 +165,16 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
                             <h3 className={styles.filterTitle}>Filtros</h3>
                             
                             {/* Contador de filtros ativos */}
-                            {(appliedFilters.categories.length + 
-                              (appliedFilters.priceRange ? 1 : 0) + 
-                              (appliedFilters.location ? 1 : 0) + 
+                            {(appliedFilters.categories.length +
+                              (appliedFilters.priceMin ? 1 : 0) +
+                              (appliedFilters.priceMax ? 1 : 0) +
+                              (appliedFilters.location ? 1 : 0) +
                               (appliedFilters.bedrooms ? 1 : 0)) > 0 && (
                                 <div className={styles.activeFiltersCount}>
-                                    {(appliedFilters.categories.length + 
-                                      (appliedFilters.priceRange ? 1 : 0) + 
-                                      (appliedFilters.location ? 1 : 0) + 
+                                    {(appliedFilters.categories.length +
+                                      (appliedFilters.priceMin ? 1 : 0) +
+                                      (appliedFilters.priceMax ? 1 : 0) +
+                                      (appliedFilters.location ? 1 : 0) +
                                       (appliedFilters.bedrooms ? 1 : 0))} filtro(s) ativo(s)
                                 </div>
                             )}
@@ -263,16 +265,25 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
 
                             <div className={styles.filterGroup}>
                                 <label className={styles.filterLabel}>Faixa de Preço</label>
-                                <select
-                                    className={styles.filterSelect}
-                                    value={filters.priceRange}
-                                    onChange={(e) => setFilters({ ...filters, priceRange: e.target.value })}
-                                >
-                                    <option value="">Todos</option>
-                                    <option value="0-300k">Até R$ 300.000</option>
-                                    <option value="300k-800k">R$ 300.000 - R$ 800.000</option>
-                                    <option value="800k+">Acima de R$ 800.000</option>
-                                </select>
+                                <div className={styles.priceRangeRow}>
+                                    <input
+                                        type="number"
+                                        className={styles.filterInput}
+                                        placeholder="De R$"
+                                        min={0}
+                                        value={filters.priceMin}
+                                        onChange={(e) => setFilters({ ...filters, priceMin: e.target.value })}
+                                    />
+                                    <span className={styles.priceRangeSep}>–</span>
+                                    <input
+                                        type="number"
+                                        className={styles.filterInput}
+                                        placeholder="Até R$"
+                                        min={0}
+                                        value={filters.priceMax}
+                                        onChange={(e) => setFilters({ ...filters, priceMax: e.target.value })}
+                                    />
+                                </div>
                             </div>
 
                             <div className={styles.filterGroup}>
@@ -359,8 +370,8 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
                                 <button
                                     className={styles.clearButton}
                                     onClick={() => {
-                                        setFilters({ categories: [], priceRange: '', location: '', bedrooms: '' });
-                                        setAppliedFilters({ categories: [], priceRange: '', location: '', bedrooms: '' });
+                                        setFilters({ categories: [], priceMin: '', priceMax: '', location: '', bedrooms: '' });
+                                        setAppliedFilters({ categories: [], priceMin: '', priceMax: '', location: '', bedrooms: '' });
                                     }}
                                 >
                                     Limpar Filtros
@@ -382,8 +393,8 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
                                 <button 
                                     className={styles.clearButton}
                                     onClick={() => {
-                                        setFilters({ categories: [], priceRange: '', location: '', bedrooms: '' });
-                                        setAppliedFilters({ categories: [], priceRange: '', location: '', bedrooms: '' });
+                                        setFilters({ categories: [], priceMin: '', priceMax: '', location: '', bedrooms: '' });
+                                        setAppliedFilters({ categories: [], priceMin: '', priceMax: '', location: '', bedrooms: '' });
                                     }}
                                 >
                                     Limpar todos os filtros
