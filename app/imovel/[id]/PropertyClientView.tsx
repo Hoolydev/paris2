@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import styles from './page.module.css';
 import ImageModal from '@/components/ImageModal';
 import PropertyContactForm from '@/components/PropertyContactForm';
@@ -34,10 +33,15 @@ interface PropertyClientViewProps {
 export default function PropertyClientView({ property }: PropertyClientViewProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalIndex, setModalIndex] = useState(0);
+    const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
 
     const allImages = property.images && property.images.length > 0
         ? property.images
         : [property.image || '/placeholder-image.jpg'];
+
+    const handleImageError = (index: number) => {
+        setFailedImages(prev => new Set(prev).add(index));
+    };
 
     const openModal = (index: number) => {
         setModalIndex(index);
@@ -56,46 +60,67 @@ export default function PropertyClientView({ property }: PropertyClientViewProps
             {/* Gallery Grid (1 Left, 3 Right) */}
             <section className={styles.heroGrid}>
                 <div className={styles.mainImageWrapper} onClick={() => openModal(0)}>
-                    <Image
-                        src={allImages[0]}
-                        alt={property.title}
-                        fill
-                        className={styles.image}
-                        priority
-                    />
+                    {!failedImages.has(0) ? (
+                        <img
+                            src={allImages[0]}
+                            alt={property.title}
+                            className={styles.image}
+                            onError={() => handleImageError(0)}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                    ) : (
+                        <div className={styles.imagePlaceholder} style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', fontSize: '1rem' }}>
+                            Imagem indisponível
+                        </div>
+                    )}
                 </div>
                 <div className={styles.secondaryImages}>
                     {/* Top Right */}
                     {allImages[1] && (
                         <div className={styles.subImageWrapper} onClick={() => openModal(1)}>
-                            <Image
-                                src={allImages[1]}
-                                alt={`${property.title} - 2`}
-                                fill
-                                className={styles.image}
-                            />
+                            {!failedImages.has(1) ? (
+                                <img
+                                    src={allImages[1]}
+                                    alt={`${property.title} - 2`}
+                                    className={styles.image}
+                                    onError={() => handleImageError(1)}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            ) : (
+                                <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)' }} />
+                            )}
                         </div>
                     )}
                     {/* Bottom Right Split */}
                     <div className={styles.secondaryBottom}>
                         {allImages[2] && (
                             <div className={styles.subImageWrapper} onClick={() => openModal(2)}>
-                                <Image
-                                    src={allImages[2]}
-                                    alt={`${property.title} - 3`}
-                                    fill
-                                    className={styles.image}
-                                />
+                                {!failedImages.has(2) ? (
+                                    <img
+                                        src={allImages[2]}
+                                        alt={`${property.title} - 3`}
+                                        className={styles.image}
+                                        onError={() => handleImageError(2)}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                ) : (
+                                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)' }} />
+                                )}
                             </div>
                         )}
                         {allImages[3] && (
                             <div className={styles.subImageWrapper} onClick={() => openModal(3)}>
-                                <Image
-                                    src={allImages[3]}
-                                    alt={`${property.title} - 4`}
-                                    fill
-                                    className={styles.image}
-                                />
+                                {!failedImages.has(3) ? (
+                                    <img
+                                        src={allImages[3]}
+                                        alt={`${property.title} - 4`}
+                                        className={styles.image}
+                                        onError={() => handleImageError(3)}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                ) : (
+                                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #e0e0e0, #c0c0c0)' }} />
+                                )}
                                 {allImages.length > 4 && (
                                     <div className={styles.moreOverlay}>
                                         +{allImages.length - 4}

@@ -201,6 +201,7 @@ export default function CadastroPage() {
                 neighborhood: formData.neighborhood,
                 code: formData.code,
                 type: formData.categories[0] || 'Casa', // Tipo principal (primeira categoria)
+                categories: formData.categories, // Salva categorias no campo correto
                 features: [...formData.categories, ...formData.features.split(',').map(f => f.trim()).filter(f => f !== '')]
             };
 

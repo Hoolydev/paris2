@@ -19,6 +19,7 @@ interface Property {
     area: string;
     landArea?: string;
     builtArea?: string;
+    features?: string[];
 }
 
 interface PropertiesListProps {
@@ -71,15 +72,39 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
 
         // Filter by Categories - verifica se o imóvel tem pelo menos uma das categorias selecionadas
         if (appliedFilters.categories.length > 0) {
-            // Usa as categorias do imóvel (se existirem) ou o tipo como fallback
-            const propertyCategories = (property.categories && property.categories.length > 0) ? property.categories : [property.type];
-            
-            const hasMatchingCategory = appliedFilters.categories.some(filterCat => 
-                propertyCategories.some(propCat => 
+            // Categorias conhecidas para extrair do campo features
+            const knownCategories = ['Casa', 'Apartamento', 'Terreno', 'Zona Rural', 'Minha Casa Minha Vida', 'Alto Padrão'];
+
+            // Monta lista de categorias: usa categories, depois features (onde historicamente foram salvas), depois type como fallback
+            let propertyCategories: string[] = [];
+
+            if (property.categories && property.categories.length > 0) {
+                propertyCategories = [...property.categories];
+            }
+
+            // Também verifica features pois o cadastro salva categorias lá
+            if (property.features && property.features.length > 0) {
+                const categoriesFromFeatures = property.features.filter(f =>
+                    knownCategories.some(kc => kc.toLowerCase() === f.toLowerCase())
+                );
+                categoriesFromFeatures.forEach(cat => {
+                    if (!propertyCategories.some(pc => pc.toLowerCase() === cat.toLowerCase())) {
+                        propertyCategories.push(cat);
+                    }
+                });
+            }
+
+            // Fallback para type se nenhuma categoria foi encontrada
+            if (propertyCategories.length === 0) {
+                propertyCategories = [property.type];
+            }
+
+            const hasMatchingCategory = appliedFilters.categories.some(filterCat =>
+                propertyCategories.some(propCat =>
                     propCat.toLowerCase() === filterCat.toLowerCase()
                 )
             );
-            
+
             if (!hasMatchingCategory) {
                 matches = false;
             }

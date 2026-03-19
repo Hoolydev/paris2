@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import styles from './ImageModal.module.css';
 
 interface ImageModalProps {
@@ -49,12 +48,11 @@ export default function ImageModal({ images, initialIndex, isOpen, onClose }: Im
                 </button>
 
                 <div className={styles.imageContainer}>
-                    <Image
+                    <img
                         src={images[currentIndex]}
                         alt={`Image ${currentIndex + 1}`}
-                        fill
                         className={styles.image}
-                        quality={100}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />
                 </div>
 
