@@ -1,0 +1,3403 @@
+{
+  "name": "01. Secretária v3",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const ultima_mensagem_da_fila = $input.last()\nconst mensagem_do_workflow = $('Info').first()\n\nif (ultima_mensagem_da_fila.json.id_mensagem !== mensagem_do_workflow.json.id_mensagem) {\n  // Mensagem encavalada, para o workflow\n  return [];\n}\n\n// Pass-through da fila de mensagens\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -896
+      ],
+      "id": "b190b521-f7d2-4bb9-9369-ee2fdea0741b",
+      "name": "Mensagem encavalada?"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_fila_mensagens",
+          "mode": "list"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "telefone",
+              "value": "={{ $('Info').item.json.telefone }}"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "timestamp"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1344,
+        -896
+      ],
+      "id": "7b1a84c3-a489-455a-ba6f-5876014c1399",
+      "name": "Buscar mensagens",
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_fila_mensagens",
+          "mode": "list"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "telefone",
+              "value": "={{ $('Info').item.json.telefone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1856,
+        -672
+      ],
+      "id": "c10be89a-bc6d-4a3f-90ca-6d0ea39cb3b6",
+      "name": "Limpar fila de mensagens",
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        -896
+      ],
+      "id": "97c49990-5a2e-4a45-a631-11512293373b",
+      "name": "Esperar",
+      "webhookId": "5e72bbc8-a786-414e-983d-d4866b92ed4f"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Info').item.json.mensagem }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    },
+                    "id": "1382cd26-d96e-4c55-99dd-2ca305ffe82e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "bf854624-77ee-461e-a072-e373dcecf4f8",
+                    "leftValue": "={{ $('Info').item.json.info_arquivo }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Arquivo"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b9a7e16f-b6e4-45d7-846d-92dcb3117593",
+                    "leftValue": "={{ $('Info').item.json.mensagem_de_audio }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Áudio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        352,
+        -800
+      ],
+      "id": "3eb9983d-9f9e-4678-a2c5-64d6442eef76",
+      "name": "Tipo de mensagem"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Info').item.json.telefone }}",
+        "tableName": "n8n_historico_mensagens",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        2224,
+        -560
+      ],
+      "id": "08aa6405-6a33-4a4b-8d99-b55cd86c46ea",
+      "name": "Memory",
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_fila_mensagens",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "telefone": "={{ $('Info').item.json.telefone }}",
+            "mensagem": "={{ $('Info').item.json.mensagem || $json.text || $json.content.parts?.[0].text || '<mensagem de áudio não audível>' }}{{ $('Info').item.json.info_arquivo ? `\\n${$('Info').item.json.info_arquivo}` : '' }}",
+            "timestamp": "={{ $('Info').item.json.timestamp.toDateTime() }}",
+            "id_mensagem": "={{ $('Info').item.json.id_mensagem }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "id_mensagem",
+              "displayName": "id_mensagem",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "telefone",
+              "displayName": "telefone",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensagem",
+              "displayName": "mensagem",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        672,
+        -896
+      ],
+      "id": "9a9c1ac5-4ceb-4be3-97cd-a23d30b1cad4",
+      "name": "Enfileirar mensagem.",
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/conversations/{{ $('Info').item.json.id_conversa }}/update_last_seen",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2096,
+        -864
+      ],
+      "id": "8978f4df-1eb6-444f-b0bc-cf6e824d207f",
+      "name": "Marcar como lidas",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Mensagem recebida').item.json.body.attachments[0].data_url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        -752
+      ],
+      "id": "4310da3f-9ba5-41b1-9f04-7f7b034fbbd2",
+      "name": "Download áudio",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "40ff895f-f63f-4e4f-bba3-c7d803c277f1",
+              "name": "url_chatwoot",
+              "value": "https://app.parisimoveisgoianesia.com.br/",
+              "type": "string"
+            },
+            {
+              "id": "542c4f0e-1d6a-4da2-8e08-a4127bd85423",
+              "name": "agendamento_duracao_minutos",
+              "value": "30",
+              "type": "string"
+            },
+            {
+              "id": "9aa7c3ba-f1fa-4222-9b2e-824a2c743409",
+              "name": "id_conversa_alerta",
+              "value": "1",
+              "type": "string"
+            },
+            {
+              "id": "c8fd010d-6096-4a50-b3e2-e9fe26661840",
+              "name": "id_mensagem",
+              "value": "={{ $json.body.id }}",
+              "type": "string"
+            },
+            {
+              "id": "1b513343-9b6a-4f6e-a012-ed819bf34a31",
+              "name": "id_conta",
+              "value": "={{ $json.body.account.id }}",
+              "type": "string"
+            },
+            {
+              "id": "05c14b9a-5f27-465a-a047-71553826bd7a",
+              "name": "id_conversa",
+              "value": "={{ $json.body.conversation.id }}",
+              "type": "string"
+            },
+            {
+              "id": "7ca2f49a-8aad-47db-877f-6b8ddc6c6830",
+              "name": "id_contato",
+              "value": "={{ $json.body.conversation.contact_inbox.contact_id }}",
+              "type": "string"
+            },
+            {
+              "id": "8bf522a6-75fb-434a-854c-b736539309e1",
+              "name": "telefone",
+              "value": "={{ $json.body.sender.phone_number }}",
+              "type": "string"
+            },
+            {
+              "id": "188fafa0-910a-456b-91d0-9c9188d66535",
+              "name": "nome",
+              "value": "={{ $json.body.sender.name }}",
+              "type": "string"
+            },
+            {
+              "id": "0d622a33-f313-4758-a764-fa6cbf2b0587",
+              "name": "mensagem",
+              "value": "={{ $json.body.content || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "8f4b9d84-56e0-4f45-9f17-68c53f365f43",
+              "name": "mensagem_de_audio",
+              "value": "={{ $json.body.attachments?.[0]?.meta?.is_recorded_audio || false }}",
+              "type": "boolean"
+            },
+            {
+              "id": "2b679a3f-788f-4cd2-88d5-4f03af68f224",
+              "name": "timestamp",
+              "value": "={{ $json.body.created_at }}",
+              "type": "string"
+            },
+            {
+              "id": "24caf88e-74ce-43ab-8dc4-1fff471b706f",
+              "name": "tipo",
+              "value": "={{ $json.body.message_type }}",
+              "type": "string"
+            },
+            {
+              "id": "573669d2-1e43-4010-8c82-a67459ffe1db",
+              "name": "etiquetas",
+              "value": "={{ $json.body.conversation.labels }}",
+              "type": "array"
+            },
+            {
+              "id": "38610298-ef19-4e79-bdeb-753c02636ef7",
+              "name": "email_usuario",
+              "value": "={{ $json.body.sender.email }}",
+              "type": "string"
+            },
+            {
+              "id": "d37b6368-01a0-4161-a4a9-26c0960cd489",
+              "name": "atributos_contato",
+              "value": "={{ $json.body.sender.custom_attributes }}",
+              "type": "object"
+            },
+            {
+              "id": "6ab3c868-9b6b-4452-884d-7f8faeeabdd5",
+              "name": "info_arquivo",
+              "value": "={{ !$json.body.attachments?.[0]?.meta?.is_recorded_audio && $json.body.attachments[0]?.file_type ? `\\n<usuário enviou um arquivo do tipo '${$json.body.attachments[0]?.file_type}'>` : '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -304,
+        -784
+      ],
+      "id": "18a03254-880f-420b-8243-ee3f119d8377",
+      "name": "Info"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.mensagem.toLowerCase() }}",
+                    "rightValue": "/reset",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a29a880e-fb21-43fa-9a4a-092128ddfe2e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Reset"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3dd2c5af-7ae0-4d65-98b2-66ab0fe22c45",
+                    "leftValue": "={{ $json.mensagem.toLowerCase() }}",
+                    "rightValue": "/teste",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Teste"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Mensagem normal"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -80,
+        -800
+      ],
+      "id": "68d03b28-a861-42d3-b78b-b9506b8f1e17",
+      "name": "Reset ou teste"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/conversations/{{ $('Info').item.json.id_conversa }}/labels",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "labels",
+              "value": "={{ $('Info').item.json.etiquetas.filter(etiqueta => !['agente-off'].includes(etiqueta)) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        672,
+        -1456
+      ],
+      "id": "c786f6a8-0a4d-442d-b7c2-3a8002717178",
+      "name": "Limpar etiquetas",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/conversations/{{ $('Info').item.json.id_conversa }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "=Memória resetada."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1232,
+        -1456
+      ],
+      "id": "7b7e4714-593e-4a46-9176-77bc507e4eed",
+      "name": "Enviar memória resetada",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_historico_mensagens",
+          "mode": "list"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "value": "={{ $('Info').item.json.telefone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        288,
+        -1456
+      ],
+      "id": "d0ef7077-d205-497f-b7e6-e8127d5d0d3e",
+      "name": "Limpar memória",
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/contacts/{{ $('Info').item.json.id_contato }}/destroy_custom_attributes",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"custom_attributes\": [\"preferencia_audio_texto\", \"asaas_id_cliente\", \"asaas_id_cobranca\", \"asaas_status_cobranca\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        -1456
+      ],
+      "id": "8d57c437-245a-4997-a849-ba09a713b5c8",
+      "name": "Resetar atributos",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_fila_mensagens",
+          "mode": "list"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "telefone",
+              "value": "={{ $('Info').item.json.telefone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1056,
+        -1456
+      ],
+      "id": "627c1e36-1d36-4fcf-a6d0-8f9917254b89",
+      "name": "Limpar fila de mensagens1",
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/conversations/{{ $('Info').item.json.id_conversa }}/labels",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "labels",
+              "value": "={{ $json.etiquetas.append('testando-agente').unique() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        288,
+        -1152
+      ],
+      "id": "d93a9fec-5a0e-43fb-aa2e-96fc1855f50e",
+      "name": "Colocar etiqueta testando-agente",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/conversations/{{ $('Info').item.json.id_conversa }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "=Modo de teste habilitado."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        -1152
+      ],
+      "id": "454d29c8-aaaf-4638-a7b0-be2a5ce897ba",
+      "name": "Enviar teste habilitado",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "84e8cae9-28e3-4abd-869c-612fcff95948",
+              "leftValue": "={{ $json.isEmpty() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "ee8306ee-1d14-4732-9865-a21f52da6a2e",
+              "leftValue": "={{ $json.lock_conversa }}",
+              "rightValue": "pending",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "bf08f3f7-aff7-47be-8f89-2d0e3ee19049",
+              "leftValue": "={{ $runIndex }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1456,
+        -704
+      ],
+      "id": "caa4838b-0a02-46ca-b6cd-301818e2c0f9",
+      "name": "Agente já terminou de responder?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7eab8669-6929-4dc6-b3e2-943065bc306c",
+              "name": "mensagem",
+              "value": "={{ $('Mensagem encavalada?').all().map(info => info.json.mensagem).join('\\\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2288,
+        -864
+      ],
+      "id": "037c5e01-b341-4db9-a74a-e4ca9e71f2d6",
+      "name": "Coletar mensagens",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "Utilize essa ferramenta para enviar uma mensagem de texto para o usuário. Usada para enviar links, números de telefone, e outras informações a serem destacadas, e que não funcionam bem para mensagens de áudio.\n\nQuando utilizar essa ferramenta, **NUNCA INCLUA OS DADOS NOVAMENTE NA SUA SAÍDA**.",
+        "method": "POST",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/conversations/{{ $('Info').item.json.id_conversa }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $fromAI('conteudo', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        3216,
+        -496
+      ],
+      "id": "96cde95b-34fe-4171-9f26-e3b4109fc029",
+      "name": "Enviar texto separado",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_historico_mensagens",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $('Info').item.json.telefone }}",
+            "message": "={\n  \"type\": \"ai\",\n  \"content\": \"<tool-calls>{{ $json.intermediateSteps.map(s => `<tool-call><action>${s.action.log}</action><result>${s.observation}</result></tool-call>`).join('').replaceAll('\\n', '').replaceAll('\\\\\"',\"'\").replaceAll('\"',\"'\") }}</tool-calls>\",\n  \"tool_calls\": [],\n  \"additional_kwargs\": {},\n  \"response_metadata\": {},\n  \"invalid_tool_calls\": []\n}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4176,
+        -896
+      ],
+      "id": "bd84cf21-e0e9-4315-9fe7-bf0dea5a2572",
+      "name": "Salvar tool calls",
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "063ab981-e52e-4779-9c1a-8d6dfa384643",
+              "leftValue": "={{ $json.intermediateSteps }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3936,
+        -736
+      ],
+      "id": "f3b20136-aac6-4c8a-9e2f-788ccf87e91d",
+      "name": "Usou tools?"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/contacts/{{ $('Info').item.json.id_contato }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4576,
+        -704
+      ],
+      "id": "d8ef645e-b95e-4615-b2fc-7cc174b4f36c",
+      "name": "Buscar atributos do contato",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const { preferencia_audio_texto } = $('Buscar atributos do contato').first().json.payload.custom_attributes;\nconst { mensagem_de_audio } = $('Info').first().json;\n\nif (preferencia_audio_texto === 'texto') {\n  return { tipo_resposta: 'texto' };\n}\nif (preferencia_audio_texto === 'audio') {\n  return { tipo_resposta: 'audio' };\n}\n// Preferência não setada, usar tipo da mensagem do usuário\nreturn { tipo_resposta: mensagem_de_audio ? 'audio' : 'texto' };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4768,
+        -704
+      ],
+      "id": "813ccb24-cbb4-42f2-b2f9-4f00f798d996",
+      "name": "Calcular tipo da resposta"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tipo_resposta }}",
+                    "rightValue": "texto",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1382cd26-d96e-4c55-99dd-2ca305ffe82e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b9a7e16f-b6e4-45d7-846d-92dcb3117593",
+                    "leftValue": "={{ $json.tipo_resposta }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Áudio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        4960,
+        -704
+      ],
+      "id": "9a813a68-f536-4043-823c-235fccc6de0a",
+      "name": "Tipo da resposta"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/conversations/{{ $('Info').item.json.id_conversa }}/toggle_typing_status",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "typing_status",
+              "value": "recording"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5552,
+        -624
+      ],
+      "id": "975120dd-10a2-468a-9f9b-08db4c4020c4",
+      "name": "Gravando...",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/conversations/{{ $('Info').item.json.id_conversa }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "is_recorded_audio",
+              "value": "=[\"{{ $binary.data.fileName }}\"]"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "attachments[]",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5952,
+        -624
+      ],
+      "id": "97b4bc97-5114-4cd9-b705-521126391d6d",
+      "name": "Enviar áudio",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "2foZEVbIFUdj0RQf",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/2foZEVbIFUdj0RQf",
+          "cachedResultName": "## 07. Quebrar e enviar mensagens"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mensagem": "={{ $('Formatar texto').item.json.text }}",
+            "id_conversa": "={{ $('Info').item.json.id_conversa }}",
+            "id_conta": "={{ $('Info').item.json.id_conta }}",
+            "url_chatwoot": "={{ $('Info').item.json.url_chatwoot }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "mensagem",
+              "displayName": "mensagem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "url_chatwoot",
+              "displayName": "url_chatwoot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "id_conta",
+              "displayName": "id_conta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "id_conversa",
+              "displayName": "id_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        5760,
+        -864
+      ],
+      "id": "6dbcc628-1d2c-48c1-bd0d-8558788d989e",
+      "name": "Quebrar e enviar mensagens"
+    },
+    {
+      "parameters": {
+        "description": "Utilize essa ferramenta para buscar as janelas disponíveis no um período especificado. Evite utilizar com janelas de tamanho muito grandes e muito pequenas. Por exemplo, considerando disponibilidade já informada das 08h às 19h:\n\n* Para janelas maiores, não busque com período fora do horário de disponibilidade já informado nas instruções.\n\n\"Quais janelas estão disponíveis amanhã?\"\n- Período início: 08h, período fim: 19h\n- (Ao invés de 00h às 00h do dia seguinte)\n\n* Para janelas menores, insira uma margem antes e depois do horário desejado.\n\n\"O horário das 12h está disponível?\"\n- Período início: 10h, período fim: 14h\n- (Ao invés de 12h às 12h30, para tamanho de janela de 30m)",
+        "workflowId": {
+          "__rl": true,
+          "value": "APEaKg71r27npR4T",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/APEaKg71r27npR4T",
+          "cachedResultName": "## 03. Buscar janelas disponíveis Google Calendar"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "periodo_inicio": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('periodo_inicio', \"Deve ser uma data e horário no futuro. Datas passadas são inválidas. A data deve ser no formato: `YYYY-MM-DDThh:mm:ssTZD`. Utilize o fuso horário conforme a data atual.\", 'string') }}",
+            "periodo_fim": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('periodo_fim', \"Deve ser uma data e horário no futuro. Datas passadas são inválidas. A data deve ser no formato: `YYYY-MM-DDThh:mm:ssTZD`. Utilize o fuso horário conforme a data atual.\", 'string') }}",
+            "id_agenda": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id_agenda', ``, 'string') }}",
+            "tamanho_janela_minutos": "={{ $('Info').item.json.agendamento_duracao_minutos }}",
+            "granularidade": 15
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "periodo_inicio",
+              "displayName": "periodo_inicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "periodo_fim",
+              "displayName": "periodo_fim",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "id_agenda",
+              "displayName": "id_agenda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tamanho_janela_minutos",
+              "displayName": "tamanho_janela_minutos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "granularidade",
+              "displayName": "granularidade",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "amostras",
+              "displayName": "amostras",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        2624,
+        -512
+      ],
+      "id": "f03610a2-da34-4352-b7fa-ec491946203a",
+      "name": "Buscar janelas disponiveis"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use essa ferramenta caso o lead expresse preferência por receber somente áudio, ou somente texto.",
+        "method": "PATCH",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/contacts/{{ $('Info').item.json.id_contato }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ \n  {\n    \"custom_attributes\": {\n      ...$('Info').item.json.atributos_contato,\n      preferencia_audio_texto: $fromAI('preferencia_audio_texto', 'audio | texto', 'string')\n    }\n  }\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        3456,
+        -496
+      ],
+      "id": "abf7fb11-216f-488a-967d-0dd1918c6694",
+      "name": "Preferencia audio texto",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Envia uma mensagem de reação como resposta a uma mensagem do usuário. Reação é sempre um emoji.\n\nIgnore a saída dessa ferramenta, ela é a mensagem enviada para o contato.\n\n**NUNCA UTILIZE ESSA FERRAMENTA MÚLTIPLAS VEZES SEGUIDAS**",
+        "method": "POST",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/conversations/{{ $('Info').item.json.id_conversa }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content_attributes",
+              "value": "={ \"in_reply_to\": {{ $('Info').item.json.id_mensagem }}, \"is_reaction\": true }"
+            },
+            {
+              "name": "content",
+              "value": "={{ $fromAI('content', `O emoji da reação.`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        3344,
+        -496
+      ],
+      "id": "135db32a-4a18-4d37-a073-fba6cef3c6b4",
+      "name": "Reagir mensagem",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        5216,
+        -464
+      ],
+      "id": "4771d42a-2738-4548-8fa0-7d3b6dec5024",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "QFzGhH3kL0O86ngk",
+          "name": "Gonsolutions api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        5520,
+        -720
+      ],
+      "id": "7dd5e209-f136-45b4-a734-648f4920b088",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "QFzGhH3kL0O86ngk",
+          "name": "Gonsolutions api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Configurar node Info!!",
+        "height": 240,
+        "width": 288,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        -864
+      ],
+      "typeVersion": 1,
+      "id": "5d3da1f7-b444-4f92-8354-d47c944f416b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_status_atendimento",
+          "mode": "list"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "value": "={{ $('Info').item.json.telefone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1232,
+        -704
+      ],
+      "id": "90d06c87-de94-47a5-a4b5-b6b8b802a4c9",
+      "name": "Verificar status atendimento",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_status_atendimento",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $('Info').item.json.telefone }}",
+            "lock_conversa": true,
+            "numero_followup": 0,
+            "aguardando_followup": true
+          },
+          "matchingColumns": [
+            "session_id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lock_conversa",
+              "displayName": "lock_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "aguardando_followup",
+              "displayName": "aguardando_followup",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "numero_followup",
+              "displayName": "numero_followup",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1664,
+        -672
+      ],
+      "id": "a6d78628-511e-483a-83f4-96264bff4a19",
+      "name": "Bloquear status atendimento",
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_status_atendimento",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $('Info').item.json.telefone }}",
+            "lock_conversa": false,
+            "numero_followup": 0,
+            "aguardando_followup": false
+          },
+          "matchingColumns": [
+            "session_id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lock_conversa",
+              "displayName": "lock_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "aguardando_followup",
+              "displayName": "aguardando_followup",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "numero_followup",
+              "displayName": "numero_followup",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        864,
+        -1456
+      ],
+      "id": "1039afab-3086-484f-bf96-96af1e10defe",
+      "name": "Resetar status atendimento",
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_status_atendimento",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $('Info').item.json.telefone }}",
+            "lock_conversa": false
+          },
+          "matchingColumns": [
+            "session_id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lock_conversa",
+              "displayName": "lock_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "aguardando_followup",
+              "displayName": "aguardando_followup",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "numero_followup",
+              "displayName": "numero_followup",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4096,
+        -544
+      ],
+      "id": "9eefd9d5-0c16-4465-ae9d-a41407ad6caa",
+      "name": "Limpar status atendimento",
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_status_atendimento",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $('Info').item.json.telefone }}",
+            "lock_conversa": false
+          },
+          "matchingColumns": [
+            "session_id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lock_conversa",
+              "displayName": "lock_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "aguardando_followup",
+              "displayName": "aguardando_followup",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "numero_followup",
+              "displayName": "numero_followup",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        6208,
+        -752
+      ],
+      "id": "a6afb058-660a-431d-b6f4-20ae7dffd3bd",
+      "name": "Limpar status atendimento1",
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "7vdqHxkElejMYKNe",
+          "name": "Conta paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Resetar conversa\n",
+        "height": 288,
+        "width": 1200,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        208,
+        -1536
+      ],
+      "typeVersion": 1,
+      "id": "c045c4a1-47a7-4429-af70-55781df56d1c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Habilitar testes\n",
+        "height": 272,
+        "width": 448,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        208,
+        -1232
+      ],
+      "typeVersion": 1,
+      "id": "965ee8f1-6475-44ea-b6da-a7724be104d4",
+      "name": "Sticky Note3",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2096,
+        -624
+      ],
+      "id": "6c101d7f-1972-4581-879b-656428b9f4df",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "QFzGhH3kL0O86ngk",
+          "name": "Gonsolutions api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Core",
+        "height": 336,
+        "width": 272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2064,
+        -688
+      ],
+      "id": "1b9a9e6c-994d-4832-ad4e-2685779ca16c",
+      "name": "Sticky Note4",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "##SUPABASE\n",
+        "height": 336,
+        "width": 288,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2336,
+        -688
+      ],
+      "id": "9baa2696-1693-4286-bca5-722dd93ded56",
+      "name": "Sticky Note6",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Google Calendar",
+        "height": 336,
+        "width": 512,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2624,
+        -688
+      ],
+      "id": "783c6a1d-e84e-4f48-a197-598b0ae9bdc8",
+      "name": "Sticky Note8",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Chatwoot",
+        "height": 336,
+        "width": 528,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3136,
+        -688
+      ],
+      "id": "46ad3f9b-c393-4242-857f-d39998697112",
+      "name": "Sticky Note9",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "93a1e408-265a-438d-b860-1ea7f6a79f93",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e5ed93cc-0025-4858-a0e5-b621594b01de",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "Agent stopped due to max iterations.",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3728,
+        -688
+      ],
+      "id": "932d2295-e9b2-484a-affa-4993f72bbaf9",
+      "name": "Output válido?"
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Problema no output do agente: {{ $('Secretária v3').item.json.output }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        4368,
+        -624
+      ],
+      "id": "692dbc35-c338-4749-88ea-e345382ba187",
+      "name": "Output inválido"
+    },
+    {
+      "parameters": {
+        "content": "## Tratar input",
+        "height": 448,
+        "width": 1600,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -944
+      ],
+      "id": "062b873b-116a-4f01-bf76-1138e87cd22f",
+      "name": "Sticky Note35"
+    },
+    {
+      "parameters": {
+        "content": "## Mensagens encavaladas",
+        "height": 448,
+        "width": 960,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1056,
+        -944
+      ],
+      "typeVersion": 1,
+      "id": "75edad12-3ab7-4fa3-8390-e675223abeaf",
+      "name": "Sticky Note15",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Secretária\n",
+        "height": 608,
+        "width": 1632,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2032,
+        -944
+      ],
+      "typeVersion": 1,
+      "id": "cf2fb1f8-0b75-47f3-b248-20efc8dc9b74",
+      "name": "Sticky Note16",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Pré-processar e enviar resposta",
+        "height": 608,
+        "width": 1872,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4512,
+        -944
+      ],
+      "id": "4969cce2-1a9a-488c-82b2-d4c8a8fe3102",
+      "name": "Sticky Note37",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Tratar output do agente",
+        "height": 608,
+        "width": 816,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3680,
+        -944
+      ],
+      "typeVersion": 1,
+      "id": "292792bc-3a71-47c4-84c2-1d8631b9f24c",
+      "name": "Sticky Note19",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "description": "Utilize essa ferramenta para enviar um arquivo do Google Drive para o usuário.\n",
+        "workflowId": {
+          "__rl": true,
+          "value": "9hOppaD3AZGdpXBF",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/9hOppaD3AZGdpXBF",
+          "cachedResultName": "## 02. Baixar e enviar imagem do Supabase"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "file_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('file_id', ``, 'string') }}",
+            "id_conta": "={{ $('Info').item.json.id_conta }}",
+            "id_conversa": "={{ $('Info').item.json.id_conversa }}",
+            "url_chatwoot": "={{ $('Info').item.json.url_chatwoot }}"
+          },
+          "matchingColumns": [
+            "file_id"
+          ],
+          "schema": [
+            {
+              "id": "file_id",
+              "displayName": "file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "id_conta",
+              "displayName": "id_conta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "id_conversa",
+              "displayName": "id_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "url_chatwoot",
+              "displayName": "url_chatwoot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        2496,
+        -512
+      ],
+      "id": "0025293d-3e54-4c9e-9a02-247ec05d9785",
+      "name": "Enviar arquivo"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Secretária v3').item.json.output }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Você é especialista em formatação de mensagem para WhatsApp, trabalhando somente na formatação e não alterando o conteúdo da mensagem.\n\n- Substitua ** por *\n- Remova #\n- Remova emojis\n\n**SUA SAÍDA DEVE SER SOMENTE A MENSAGEM FORMATADA. NÃO INCLUA NENHUMA INFORMAÇÃO ADICIONAL NA SAÍDA**"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        5360,
+        -864
+      ],
+      "id": "6dd6992c-a64b-4c28-ad72-0328bd252fa2",
+      "name": "Formatar texto",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Secretária v3').item.json.output }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Você é um assistente especialista em text-to-speech e formatação usando tags SSML.\n\nVocê irá receber um texto e a sua tarefa é aplicar tags SSML para deixá-lo mais natural no processo de geração de voz.\n\n### Formatação\n\n#### Datas e horas\n\nNo caso de datas e horas, modifique o texto para um formato que seja mais natural quando falado.\n\nExemplos:\n\n- Entrada: '10:00'\n- Saída: 'dez horas'\n\n- Entrada: '22:00'\n- Saída: 'vinte e duas horas'\n\n- Entrada: '01/01/2025'\n- Saída: 'primeiro de janeiro de 2025'\n\n#### Telefones\n\nSimilar ao feita para datas, modifique o texto para um formato que seja mais natural quando falado. Para o DDD converta sempre em dezena, e para o resto dos números, adicione pausas entre cada bloco.\n\nExemplos:\n\n- Entrada: '(11) 1234-5678'\n- Saída: 'onze, um dois três quatro, cinco seis sete oito'\n\n#### Endereços\n\nFaça a mesma coisa para endereços. Exemplos:\n\n- Entrada: 'Av. Rondon Pacheco'\n- Saída: 'Avenida Rondon Pacheco'\n\n- Entrada: 'CEP 12345-000'\n- Saída: 'CEP um dois três quatro cinco zero zero zero'\n\n#### Pausas\n\nA formatação de pausas em SSML é como segue:\n\n```\n<break time=\"1s\"/>\n```\n\nSempre que necessário, inclua pausas nesse formato.\n\n**NUNCA INCLUA PAUSAS COMO TEXTO**. Exemplo incorreto: ❌ \"Pausa de 1s\"\n\n### Notas\n\n- Sempre coloque uma pausa de 1.0s no começo.\n- Não use breaks no meio do texto, apenas no começo.\n- Mantenha o mesmo texto original, mas revise o uso de vírgulas excessivas para deixar o texto mais natural ao falar.\n- Remova emojis.\n- A sua saída será somente o texto convertido.\n- Use <speak> ao redor da saída.\n\n\n**NÃO INCLUA NENHUMA INFORMAÇÃO ALÉM DO TEXTO CONVERTIDO**\n**NUNCA INCLUA CARACTER DE NOVA LINHA \"\\n\" NA SAÍDA**\n**NUNCA COLOQUE ÂNCORAS COMO ```ssml AO REDOR DO TEXTO**"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        5232,
+        -624
+      ],
+      "id": "e26f58ed-98af-4d57-8451-52e31bd00feb",
+      "name": "Formatar SSML",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "description": "Use essa ferramenta para refletir sobre algo. Ela não obterá novas informações nem alterará o banco de dados, apenas adicionará o pensamento ao registro. Use-a quando for necessário um raciocínio complexo ou alguma memória em cache."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        2096,
+        -496
+      ],
+      "id": "686de7cc-fddf-4a48-b756-7ceab5e6f540",
+      "name": "Refletir"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "paris-imoveis",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -624,
+        -784
+      ],
+      "id": "4139f56e-dce6-45f8-ae04-8fff4e34a6ef",
+      "name": "Mensagem recebida",
+      "webhookId": "947cebfc-8233-46e1-9528-4963d313479c"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Envia um alerta de consulta cancelada para o gestor da clínica.",
+        "method": "POST",
+        "url": "={{ $('Info').item.json.url_chatwoot }}/api/v1/accounts/{{ $('Info').item.json.id_conta }}/conversations/{{ $('Info').item.json.id_conversa_alerta }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        3568,
+        -496
+      ],
+      "id": "6ca02593-5bc6-40e2-8741-593dbbba3631",
+      "name": "Enviar alerta de cancelamento",
+      "credentials": {
+        "chatwootApi": {
+          "id": "sqJv1wXkoyN0VJDn",
+          "name": "Paris Imoveis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Utilize essa ferramenta para criar um agendamento no horário especificado, com duração do evento conforme já especificado nas instruções gerais.\n\nSempre verifique se já não chamou essa ferramenta antes de chamá-la.\n\n**NUNCA CHAME ESSA FERRAMENTA MAIS DE UMA VEZ PARA O MESMO AGENDAMENTO.**\n\nCaso necessário, utilize a ferramenta \"Buscar_agendamentos_do_contato\" para confirmar se o agendamento já foi realizado para esse contato.",
+        "workflowId": {
+          "__rl": true,
+          "value": "fDGrSYimen20WZN0",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/fDGrSYimen20WZN0",
+          "cachedResultName": "## 04. Criar evento Google Calendar"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "evento_inicio": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('evento_inicio', \"Deve ser uma data e horário no futuro. Datas passadas são inválidas. A data deve ser no formato: `YYYY-MM-DDThh:mm:ssTZD`. Utilize o fuso horário conforme a data atual.\", 'string') }}",
+            "duracao_minutos": "={{ $('Info').item.json.agendamento_duracao_minutos }}",
+            "titulo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('titulo', ``, 'string') }}",
+            "descricao": "={{ $fromAI('descricao', ``, 'string') }}\n\nTelefone: {{ $('Info').item.json.telefone }}",
+            "id_agenda": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id_agenda', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "evento_inicio",
+              "displayName": "evento_inicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "duracao_minutos",
+              "displayName": "duracao_minutos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "titulo",
+              "displayName": "titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "descricao",
+              "displayName": "descricao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "id_agenda",
+              "displayName": "id_agenda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        2928,
+        -528
+      ],
+      "id": "3c8efad6-349e-4580-be58-2f3c059fdfe6",
+      "name": "Criar agendamento"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Utilize essa ferramenta para deletar um agendamento.",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $fromAI('id_agenda', ``, 'string') }}",
+          "mode": "id"
+        },
+        "eventId": "={{ $fromAI('id_evento', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        2832,
+        -528
+      ],
+      "id": "8ac0765a-03df-42c2-87ea-b3fb99911db9",
+      "name": "Cancelar agendamento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2UJbavrAPjXrlqra",
+          "name": "Google Calendar Paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Utilize essa ferramenta para buscar os agendamentos já existentes para o contato atual. Utilize antes de criar novos agendamentos, para evitar agendamentos duplicados.",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $fromAI('id_agenda', ``, 'string') }}",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "timeMax": "=",
+        "options": {
+          "query": "={{ $('Info').item.json.telefone }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        3040,
+        -528
+      ],
+      "id": "630adc4f-5d5f-4191-923d-6bb6f9dc105a",
+      "name": "Buscar agendamentos do contato",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2UJbavrAPjXrlqra",
+          "name": "Google Calendar Paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.mensagem }}{{ !$('Info').item.json.mensagem_de_audio && $('Info').item.json.tipo_arquivo ? `\\n<usuário enviou um arquivo do tipo '${$('Info').item.json.tipo_arquivo}'>` : '' }}",
+        "options": {
+          "systemMessage": "=# PAPEL\n\n<papel>\n  Você é o Andrézinho, assistente virtual da Paris Imóveis de Goianésia-GO, responsável pelo atendimento via WhatsApp. Sua missão é proporcionar um atendimento excepcional aos clientes, apresentando imóveis, agendando visitas, esclarecendo dúvidas e garantindo uma experiência fluida e profissional em todas as interações.\n</papel>\n\n# PERSONALIDADE E TOM DE VOZ\n\n<personalidade>\n  * **Simpático e acessível**: Use uma linguagem descontraída mas profissional, como um amigo que entende do mercado\n  * **Empolgado e motivado**: Transmita entusiasmo ao apresentar imóveis e oportunidades\n  * **Profissional e confiável**: Demonstre conhecimento do mercado imobiliário de Goianésia\n  * **Paciente e atencioso**: Entenda que comprar/alugar um imóvel é uma decisão importante\n  * **Proativo**: Sugira opções, antecipe necessidades e ofereça alternativas\n  * **Tom informal**: Pode usar \"você\", expressões como \"show\", \"beleza\", \"fechou\" — mas sem exagero\n</personalidade>\n\n# CONTEXTO DA IMOBILIÁRIA\n\n<informacoes-imobiliaria>\n  ### DADOS DA EMPRESA\n\n  * **Nome**: Paris Imóveis\n  * **Localização**: Rua 14, nº 320 - Centro, Goianésia - GO\n  * **WhatsApp**: (62) 9 8588-6688\n  * **Instagram**: @parisimoveisgoianesia\n  * **Facebook**: /parisimoveispravoce\n  * **Site**: [PREENCHER URL DO SITE]\n\n  ### TIPOS DE IMÓVEIS\n\n  * Casa\n  * Apartamento\n  * Terreno\n  * Minha Casa Minha Vida\n  * [PREENCHER OUTROS TIPOS SE HOUVER]\n\n  ### SERVIÇOS OFERECIDOS\n\n  * Venda de imóveis\n  * Assessoria na compra\n  * Consultoria para investimento\n  * Auxílio com financiamento e Minha Casa Minha Vida\n  * [PREENCHER: Locação? Avaliação? Administração de aluguel?]\n\n  ### HORÁRIO DE ATENDIMENTO\n\n  * Segunda a Sexta: 8:00 ás 20:00\n  * Sábado: 8:00 ás 20:00\n  * Domingo e Feriados: com agendamento\n\n  ### BAIRROS ATENDIDOS EM GOIANÉSIA\n\n  * Centro\n  * [PREENCHER DEMAIS BAIRROS]\n</informacoes-imobiliaria>\n\n# SOP - PROCEDIMENTO OPERACIONAL PADRÃO\n\n## 1. FLUXO DE ATENDIMENTO INICIAL\n\n<fluxo-inicial>\n  ### 1.1 Abertura do Atendimento\n\n  1. **Cumprimente e apresente-se**: \"E aí! Sou o Andrézinho, da Paris Imóveis de Goianésia. Como posso te ajudar hoje?\"\n  2. **Identifique a necessidade**: Entenda o que o cliente procura (comprar, investir, visitar, tirar dúvidas)\n  3. **Direcione para o fluxo adequado**:\n    * Busca de imóvel → Seção 2\n    * Agendamento de visita → Seção 3\n    * Dúvidas sobre financiamento → Seção 4\n    * Informações gerais → Seção 5\n    * Outros assuntos → Avalie escopo e direcione\n\n  ### 1.2 Validação de Escopo\n\n  #### DENTRO DO ESCOPO\n\n  * Apresentação de imóveis disponíveis\n  * Envio de fotos e informações de imóveis\n  * Agendamento de visitas\n  * Informações sobre a imobiliária (endereço, horários)\n  * Dúvidas gerais sobre compra de imóveis e financiamento\n  * Informações sobre bairros de Goianésia\n\n  #### FORA DO ESCOPO - Use \"Escalar_humano\"\n\n  * Negociação de valores e descontos\n  * Questões jurídicas (escritura, contratos, documentação)\n  * Reclamações complexas\n  * Assuntos pessoais dos corretores\n  * Avaliação técnica de imóveis\n  * Cliente pediu para parar de mandar mensagens\n  * Cliente quer falar com o dono ou responsável\n</fluxo-inicial>\n\n## 2. FLUXO DE BUSCA DE IMÓVEL\n\n<fluxo-busca>\n  ### 2.1 Entender o Que o Cliente Procura\n\n  SEQUÊNCIA RECOMENDADA (colete de forma natural na conversa):\n  1. Tipo de imóvel (Casa, Apartamento, Terreno, Minha Casa Minha Vida)\n  2. Bairro ou região de preferência em Goianésia\n  3. Número de quartos desejados\n  4. Faixa de preço (orçamento disponível)\n  5. Características especiais (suíte, garagem, quintal, etc.)\n\n  ### 2.2 Busca de Imóveis\n\n  1. **Use \"Refletir\"** para organizar os critérios antes de buscar\n  2. **Execute \"Buscar_imoveis\"** com os filtros adequados:\n    * type: tipo do imóvel\n    * neighborhood: bairro\n    * bedrooms: número mínimo de quartos\n    * minPrice / maxPrice: faixa de preço\n    * query: texto livre para busca específica\n  3. **Apresente 2-3 opções** com informações resumidas:\n    * Título, tipo a localização\n    * Preço\n    * Quartos, banheiros, garagem\n    * Área construída / terreno\n    * Diferenciais\n  4. **Pergunte se quer ver fotos** de algum imóvel específico\n\n  ### 2.3 Envio de Fotos\n\n  1. **Execute \"Enviar_foto_imovel\"** com a URL da imagem\n  2. **Envie uma foto por vez** e pergunte se quer ver mais\n  3. **Máximo de 5 fotos** por imóvel em uma interação\n  4. **Após enviar fotos, pergunte**:\n    * \"Gostou? Quer agendar uma visita?\"\n    * \"Quer ver outros imóveis parecidos?\"\n\n  ### 2.4 Se Não Houver Imóveis\n\n  1. **Não invente imóveis** — informe que não encontrou no momento\n  2. **Sugira alternativas**: tipo diferente, bairro próximo, faixa de preço ajustada\n  3. **Ofereça cadastro de interesse**: \"Posso avisar quando surgir algo no seu perfil!\"\n  4. Se persistir sem resultados → Use \"Escalar_humano\"\n</fluxo-busca>\n\n## 3. FLUXO DE AGENDAMENTO DE VISITA\n\n<fluxo-visita>\n  ### 3.1 Coleta de Dados para Visita\n\n  1. **Confirme qual imóvel** o cliente quer visitar\n  2. **Colete dados do cliente**:\n    * Nome completo\n    * Telefone de contato (se diferente do WhatsApp)\n  3. **Pergunte preferência de data e horário**\n  4. **Use \"Buscar_janelas_disponiveis\"** para verificar disponibilidade\n  5. **Apresente 2-3 opções de horário**\n\n  ### 3.2 Criação do Agendamento\n\n  1. **Confirme todos os dados** com o cliente\n  2. **Execute \"Criar_agendamento\"** com:\n    * titulo: Nome do cliente + Imóvel\n    * descricao: \"Visita: [título do imóvel]\\nCliente: [Nome]\\nTelefone: [número]\"\n    * evento_inicio: horário escolhido\n    * id_agenda: [PREENCHER ID DA AGENDA DO GOOGLE CALENDAR]\n  3. **Confirme ao cliente**: \"Visita agendada! Te esperamos no [data] às [hora]. O endereço é [endereço do imóvel].\"\n\n  ### 3.3 Cancelamento/Reagendamento de Visita\n\n  1. **Execute \"Buscar_agendamentos_do_contato\"** para localizar a visita\n  2. **Confirme com o cliente** qual visita será alterada\n  3. Para cancelamento: **Execute \"Cancelar_agendamento\"** e **\"Enviar_alerta_de_cancelamento\"**\n  4. Para reagendamento: Cancele a atual e retome o fluxo de agendamento\n</fluxo-visita>\n\n## 4. FLUXO DE DÚVIDAS SOBRE FINANCIAMENTO\n\n<fluxo-financiamento>\n  ### 4.1 Dúvidas Respondíveis\n\n  Forneça informações gerais sobre:\n  * Como funciona o financiamento imobiliário\n  * Documentos geralmente necessários (RG, CPF, comprovante de renda, etc.)\n  * Programa Minha Casa Minha Vida — critérios básicos\n  * Diferença entre financiamento bancário e consórcio\n  * Dicas gerais para aprovação de crédito\n\n  ### 4.2 Dúvidas Complexas ou Específicas\n\n  Para questões que exigem análise particular:\n  1. **Não tente responder** questões específicas de crédito ou aprovação\n  2. **Use \"Escalar_humano\"**\n  3. **Informe**: \"Para uma análise mais detalhada do seu caso, vou te colocar em contato com um dos nossos consultores. Ele vai poder te orientar melhor!\"\n</fluxo-financiamento>\n\n## 5. FLUXO DE INFORMAÇÕES GERAIS\n\n<fluxo-informacoes>\n  Forneça informações claras sobre:\n  * Endereço e como chegar na Paris Imóveis\n  * Horários de atendimento\n  * Redes sociais e site\n  * Tipos de imóveis disponíveis\n  * Bairros atendidos\n  * Processo de compra (de forma geral)\n  * Informações sobre Goianésia (qualidade de vida, infraestrutura, bairros)\n</fluxo-informacoes>\n\n# FERRAMENTAS DISPONÍVEIS\n\n<ferramentas>\n  ## Ferramentas de Imóveis\n\n  ### Buscar_imoveis\n\n  <ferramenta id=\"Buscar_imoveis\">\n    **Uso**: Buscar imóveis disponíveis no catálogo da Paris Imóveis\n    **Parâmetros (todos opcionais)**:\n      * type: Tipo do imóvel (Casa, Apartamento, Terreno, Minha Casa Minha Vida)\n      * neighborhood: Bairro em Goianésia\n      * bedrooms: Número mínimo de quartos\n      * minPrice: Preço mínimo em reais\n      * maxPrice: Preço máximo em reais\n      * query: Busca por texto livre (título, descrição, localização)\n    **Retorno**: Lista de imóveis com título, preço, localização, quartos, banheiros, garagem, área e URLs das fotos\n    **Importante**: \n      * Apresente no máximo 2-3 imóveis por vez\n      * Destaque os diferenciais de cada imóvel\n      * Sempre pergunte se o cliente quer ver fotos\n  </ferramenta>\n\n  ### Enviar_foto_imovel\n\n  <ferramenta id=\"Enviar_foto_imovel\">\n    **Uso**: Enviar uma foto de imóvel ao cliente via WhatsApp\n    **Parâmetro**: image_url — URL da imagem (obtida via Buscar_imoveis)\n    **Importante**: \n      * Envie apenas uma foto por vez\n      * Comente brevemente sobre o que aparece na foto\n      * Pergunte se quer ver mais fotos ou outro imóvel\n      * Máximo 5 fotos por imóvel\n  </ferramenta>\n\n  ## Ferramentas de Agendamento\n\n  ### Buscar_janelas_disponiveis\n\n  <ferramenta id=\"Buscar_janelas_disponiveis\">\n    **Uso**: Identificar horários disponíveis para visitas\n    **Parâmetros obrigatórios**:\n      * id_agenda: ID da agenda no Google Calendar\n      * data_inicio: data desejada\n      * periodo_inicio: horário inicial\n      * periodo_fim: horário final (mínimo {{ $('Info').item.json.agendamento_duracao_minutos }} minutos após início)\n    **Validação**: Sempre use período >= {{ $('Info').item.json.agendamento_duracao_minutos }} minutos\n  </ferramenta>\n\n  ### Criar_agendamento\n\n  <ferramenta id=\"Criar_agendamento\">\n    **Uso**: Criar agendamento de visita\n    **Quando**: Após confirmação do cliente e horário disponível\n    **Parâmetros**: titulo, descricao, evento_inicio, id_agenda\n    **Retorno**: Confirmação do agendamento criado com ID do evento\n    **Importante**: Verifique se já não chamou essa ferramenta antes de chamá-la novamente\n  </ferramenta>\n\n  ### Buscar_agendamentos_do_contato\n\n  <ferramenta id=\"Buscar_agendamentos_do_contato\">\n    **Uso**: Listar visitas agendadas do cliente\n    **Quando**: Cancelamento, reagendamento ou consulta\n  </ferramenta>\n\n  ### Atualizar_agendamento\n\n  <ferramenta id=\"Atualizar_agendamento\">\n    **Uso**: Modificar visita existente\n    **Parâmetros**: ID agenda, ID do agendamento, novos detalhes\n    **Caso principal**: Adicionar \"[CONFIRMADO]\" ao título quando o cliente confirmar presença\n  </ferramenta>\n\n  ### Cancelar_agendamento\n\n  <ferramenta id=\"Cancelar_agendamento\">\n    **Uso**: Cancelar visita existente\n    **Importante**: Sempre seguir com \"Enviar_alerta_de_cancelamento\"\n  </ferramenta>\n\n  ## Ferramentas de Comunicação\n\n  ### Reagir_mensagem\n\n  <ferramenta id=\"Reagir_mensagem\">\n    **Uso**: Adicionar reação a uma mensagem\n    **Emojis permitidos**: 😀 ❤️ 👍 👀 ✅ 🏠\n    **Frequência**: Máximo 3 por conversa. Use para confirmar que entendeu ou celebrar uma decisão\n  </ferramenta>\n\n  ### Enviar_texto_separado\n\n  <ferramenta id=\"Enviar_texto_separado\">\n    **Uso EXCLUSIVO**: Envio de links, endereços ou dados de contato quando <preferencia-audio-texto> é \"audio\".\n    **Nunca use para**: Mensagens normais de conversa\n    **Importante**: NUNCA UTILIZAR CASO <preferencia-audio-texto> seja \"texto\" ou \"ambos\".\n  </ferramenta>\n\n  ### Alterar_preferencia_audio_texto\n\n  <ferramenta id=\"Alterar_preferencia_audio_texto\">\n    **Uso**: Quando cliente solicitar mudança no formato de resposta\n    **Opções**: \"audio\" | \"texto\" | \"ambos\"\n    Nesse momento você está respondendo com: <preferencia-audio-texto>{{ $('Info').item.json.atributos_contato.preferencia_audio_texto || 'ambos' }}</preferencia-audio-texto>\n  </ferramenta>\n\n  ## Ferramentas de Gestão\n\n  ### Escalar_humano\n\n  <ferramenta id=\"Escalar_humano\">\n    **Uso imediato para**:\n      * Negociação de valores\n      * Questões jurídicas/documentais\n      * Insatisfação grave do cliente\n      * Assuntos fora do escopo\n      * Cliente quer falar com uma pessoa ou responsável\n      * Cliente solicitou que parasse de enviar mensagens\n      * Dúvidas complexas sobre financiamento/crédito\n  </ferramenta>\n\n  ### Enviar_alerta_de_cancelamento\n\n  <ferramenta id=\"Enviar_alerta_de_cancelamento\">\n    **Uso**: Sempre após cancelamento de visita\n    **Incluir**: Nome do cliente, imóvel, data/hora, motivo (se informado)\n  </ferramenta>\n\n  ### Refletir\n\n  <ferramenta id=\"Refletir\">\n    **Uso**: Antes de operações complexas\n    **Situações**: Organizar critérios de busca, revisar ações, casos duvidosos\n  </ferramenta>\n</ferramentas>\n\n# VALIDAÇÕES E REGRAS DE NEGÓCIO\n\n<validacoes>\n  1. **Imóveis**\n    * NUNCA invente imóveis que não apareceram na busca\n    * NUNCA invente preços, medidas ou características\n    * Se a busca retornar vazio, informe ao cliente honestamente\n    * Apresente no máximo 3 imóveis por vez\n\n  2. **Fotos**\n    * Envie apenas URLs retornadas pela ferramenta \"Buscar_imoveis\"\n    * Máximo 5 fotos por imóvel em uma interação\n    * Sempre comente/contextualize a foto enviada\n\n  3. **Agendamentos**\n    * Apenas dentro do horário de atendimento\n    * Nunca agendar visitas em datas passadas\n    * Respeitar duração de {{ $('Info').item.json.agendamento_duracao_minutos }} minutos por visita\n\n  4. **Restrições de Escopo**\n    * NUNCA negocie valores ou dê descontos\n    * NUNCA forneça pareceres jurídicos\n    * NUNCA garanta aprovação de financiamento\n    * NUNCA fale mal de concorrentes\n    * NUNCA invente informações sobre bairros ou infraestrutura\n</validacoes>\n\n# EXEMPLOS DE FLUXO\n\n<exemplos>\n  **ATENÇÃO**: Estes são exemplos ilustrativos. Sempre siga o SOP e adapte conforme necessário. Faça um atendimento personalizado.\n\n  ## Exemplo 1: Busca de Imóvel Completa\n\n  **Cliente**: Oi, tô procurando uma casa\n  **Andrézinho**: Fala! Sou o Andrézinho, da Paris Imóveis de Goianésia. Fico feliz que entrou em contato! Vamos achar o lugar perfeito pra você.\n  Me conta: você tem alguma preferência de bairro aqui em Goianésia?\n\n  **Cliente**: Queria no centro ou próximo\n  **Andrézinho**: Show! Centro é uma ótima região. E quantos quartos você precisa?\n\n  **Cliente**: Pelo menos 3 quartos\n  **Andrézinho**: Beleza! E qual seria sua faixa de preço?\n\n  **Cliente**: Até uns 400 mil\n  **Andrézinho**: Entendi! Vou buscar as opções pra você.\n  *[Usa Buscar_imoveis com type=\"Casa\", neighborhood=\"Centro\", bedrooms=3, maxPrice=400000]*\n  \n  Encontrei algumas opções que podem te interessar:\n  \n  🏠 **Casa 3 quartos - Centro**\n  Valor: R$ 380.000 | 3 quartos (1 suíte) | 2 vagas\n  Área: 150m² construídos | Terreno: 300m²\n  \n  🏠 **Casa 4 quartos - Jd. Primavera** \n  Valor: R$ 350.000 | 4 quartos | 1 vaga\n  Área: 180m² construídos\n  \n  Quer que eu te mande as fotos de algum deles?\n\n  **Cliente**: Manda da primeira\n  **Andrézinho**: *[Usa Enviar_foto_imovel]*\n  Essa é a fachada! Casa bem cuidada, com acabamento moderno. Quer ver por dentro?\n\n  **Cliente**: Sim!\n  **Andrézinho**: *[Usa Enviar_foto_imovel]*\n  Sala ampla e bem iluminada. Gostou? Quer agendar uma visita pra ver pessoalmente?\n\n  ## Exemplo 2: Cliente com Orçamento Limitado\n\n  **Cliente**: Quero comprar minha casa mas não tenho muito dinheiro\n  **Andrézinho**: Sem problema! A Paris Imóveis trabalha com opções pra todos os bolsos. Temos inclusive imóveis no programa Minha Casa Minha Vida. Quer que eu busque essas opções?\n\n  **Cliente**: Sim, por favor\n  **Andrézinho**: *[Usa Buscar_imoveis com type=\"Minha Casa Minha Vida\"]*\n\n  ## Exemplo 3: Questão Fora do Escopo\n\n  **Cliente**: Quanto vocês cobram de comissão? Dá pra abaixar o preço desse imóvel?\n  **Andrézinho**: *[Usa Escalar_humano]*\n  Boa pergunta! Questões sobre valores e negociação eu preciso passar pro nosso time. Vou te colocar em contato com um dos nossos consultores que vai poder te dar todas as informações e condições. Um momento!\n</exemplos>\n\n# TRATAMENTO DE CASOS ESPECIAIS\n\n<casos-especiais>\n  ## Cliente Investidor\n  * Destaque potencial de valorização da região\n  * Mencione que Goianésia é polo do agronegócio (crescimento sólido)\n  * Sugira terrenos e imóveis com potencial de renda\n\n  ## Cliente de Outra Cidade\n  * Forneça informações sobre Goianésia (qualidade de vida, infraestrutura)\n  * Ofereça visita virtual (envio de fotos detalhadas)\n  * Destaque proximidade de Goiânia (~170km)\n\n  ## Múltiplos Interessados\n  * Sempre pergunte: \"A busca é para você mesmo?\"\n  * Se for para terceiro, confirme as preferências diretamente\n\n  ## Fora do Horário de Atendimento\n  * Informe o horário de funcionamento\n  * Ofereça-se para buscar imóveis e enviar informações\n  * Para visitas, agende para o próximo horário disponível\n\n  ## Cliente Insatisfeito\n  1. Demonstre empatia e tente entender o problema\n  2. Se persistir: Use \"Escalar_humano\" imediatamente\n\n  ## Recebimento de Arquivos\n  * Se o cliente enviar um arquivo, avise que não consegue visualizar\n  * Peça para enviar a informação via texto ou áudio\n</casos-especiais>\n\n# OBSERVAÇÕES FINAIS\n\n<observacoes-finais>\n  ## NUNCA ESQUEÇA\n\n  1. ⚠️ **NUNCA** invente imóveis, preços ou características que não vieram da busca\n  2. ⚠️ **SEMPRE** confirme o sucesso das ferramentas antes de informar o cliente\n  3. ⚠️ **NUNCA** negocie valores — use \"Escalar_humano\"\n  4. ⚠️ **NUNCA** agende visitas sem verificar disponibilidade com \"Buscar_janelas_disponiveis\"\n  5. ⚠️ **SEMPRE** use \"Escalar_humano\" em casos de insatisfação ou questões jurídicas\n  6. ⚠️ **NUNCA** exponha problemas técnicos ao cliente\n  7. ⚠️ **NUNCA** diga que \"irá verificar\" sem usar a ferramenta adequada\n\n  ## MANTENHA SEMPRE\n\n  * Tom amigável e profissional, sem excesso de emojis no texto\n  * Foco no objetivo do atendimento\n  * Precisão nas informações (use apenas dados das ferramentas)\n  * Entusiasmo genuíno ao apresentar imóveis\n\n  ## LEMBRE-SE\n\n  * Você é o Andrézinho, não uma IA ou assistente virtual\n  * Cada interação impacta a reputação da Paris Imóveis\n  * Comprar um imóvel é uma das maiores decisões da vida — seja empático\n  * Em caso de dúvida, use \"Refletir\" antes de agir\n  * A ferramenta \"Buscar_imoveis\" pode retornar muitos resultados — apresente apenas 2-3 por vez\n  * Use \"Alterar_preferencia_audio_texto\" quando o cliente pedir formato específico de resposta\n  * Sempre use \"Buscar_agendamentos_do_contato\" para obter o ID correto antes de atualizar ou cancelar\n</observacoes-finais>\n\n# INFORMAÇÕES DO SISTEMA\n\n<informacoes-sistema>\n  **Data e Hora Atual**: {{ $now.format('FFFF') }}\n  **Duração da Visita**: {{ $('Info').item.json.agendamento_duracao_minutos }} minutos\n</informacoes-sistema>\n",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2656,
+        -976
+      ],
+      "id": "3a8a9836-48b7-4967-8bb9-8a7924fd55f0",
+      "name": "Secretária v3",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "description": "Utilize essa ferramenta para atualizar informações no título e descrição do evento.\n\n* Ao atualizar o título e descrição, sempre verifique se você está mantendo informações anteriores que ainda são relevantes. Caso informações importantes no título e descrição do evento não tenham mudado, mantenha como antes.\n* Não pode ser utilizada para atualizar o horário do agendamento, para isso, remova o evento e crie outro utilizando as outras ferramentas.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tzp8GXgTxmctzlb4",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tzp8GXgTxmctzlb4",
+          "cachedResultName": "04.1 [EXTRA] Atualizar agendamento"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_agenda": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id_agenda', ``, 'string') }}",
+            "id_evento": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id_evento', ``, 'string') }}",
+            "titulo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('titulo', ``, 'string') }}",
+            "descricao": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('descricao', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_agenda",
+              "displayName": "id_agenda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "id_evento",
+              "displayName": "id_evento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "titulo",
+              "displayName": "titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "descricao",
+              "displayName": "descricao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        2736,
+        -512
+      ],
+      "id": "8a42d82b-3206-4078-9882-ef45cbe2487c",
+      "name": "Atualizar agendamento"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        784,
+        -752
+      ],
+      "id": "46aaf101-6a86-4429-99e9-3b07949482be",
+      "name": "Transcrever audio1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ByqjTDxARICfZUa2",
+          "name": "Paris"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Busca imóveis disponíveis no catálogo. Pode filtrar por tipo (Apartamento, Casa, Terreno, etc.), bairro, número mínimo de quartos, preço mínimo e máximo. Use sem parâmetros para listar todos os imóveis",
+        "url": "={{ $('Info').item.json.url_api }}/api/properties/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "={{ $fromAI('type', 'Tipo do imóvel: Apartamento, Casa, Terreno, Sala Comercial, etc.', 'string') }}"
+            },
+            {
+              "name": "neighborhood",
+              "value": "={{ $fromAI('neighborhood', 'Bairro desejado', 'string') }}"
+            },
+            {
+              "name": "bedrooms",
+              "value": "={{ $fromAI('bedrooms', 'Número mínimo de quartos', 'string') }}"
+            },
+            {
+              "name": "minPrice",
+              "value": "={{ $fromAI('minPrice', 'Preço mínimo em reais', 'string') }}"
+            },
+            {
+              "name": "maxPrice",
+              "value": "={{ $fromAI('maxPrice', 'Preço máximo em reais', 'string') }}"
+            },
+            {
+              "name": "query",
+              "value": "={{ $fromAI('query', 'Busca por texto livre no título, descrição ou localização', 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        2368,
+        -512
+      ],
+      "id": "18f22bcf-de49-42d4-be4e-185874c43ded",
+      "name": "Buscar imóveis"
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "value": "SOYHLrjzK2X1ezoPC6cr",
+          "mode": "list",
+          "cachedResultName": "Harry - Fierce Warrior"
+        },
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        5760,
+        -624
+      ],
+      "id": "e632329a-e596-447e-8630-b882dd7d6bc5",
+      "name": "Convert text to speech",
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "TBuwDEoMUwSOENgp",
+          "name": "ElevenLabs account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b2ed5d70-7afa-4b23-ba63-5bcc23325d25",
+              "leftValue": "={{ $json.tipo }}",
+              "rightValue": "incoming",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        -784
+      ],
+      "id": "6b709853-dd99-40ad-8a1c-4022fdce08f8",
+      "name": "Processar mensagem?2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Mensagem encavalada?": {
+      "main": [
+        [
+          {
+            "node": "Verificar status atendimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar mensagens": {
+      "main": [
+        [
+          {
+            "node": "Mensagem encavalada?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpar fila de mensagens": {
+      "main": [
+        [
+          {
+            "node": "Marcar como lidas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Esperar": {
+      "main": [
+        [
+          {
+            "node": "Buscar mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tipo de mensagem": {
+      "main": [
+        [
+          {
+            "node": "Enfileirar mensagem.",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enfileirar mensagem.",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download áudio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enfileirar mensagem.": {
+      "main": [
+        [
+          {
+            "node": "Esperar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar como lidas": {
+      "main": [
+        [
+          {
+            "node": "Coletar mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download áudio": {
+      "main": [
+        [
+          {
+            "node": "Transcrever audio1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Info": {
+      "main": [
+        [
+          {
+            "node": "Reset ou teste",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reset ou teste": {
+      "main": [
+        [
+          {
+            "node": "Limpar memória",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Colocar etiqueta testando-agente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Processar mensagem?2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpar etiquetas": {
+      "main": [
+        [
+          {
+            "node": "Resetar status atendimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpar memória": {
+      "main": [
+        [
+          {
+            "node": "Resetar atributos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resetar atributos": {
+      "main": [
+        [
+          {
+            "node": "Limpar etiquetas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpar fila de mensagens1": {
+      "main": [
+        [
+          {
+            "node": "Enviar memória resetada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Colocar etiqueta testando-agente": {
+      "main": [
+        [
+          {
+            "node": "Enviar teste habilitado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente já terminou de responder?": {
+      "main": [
+        [
+          {
+            "node": "Bloquear status atendimento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Esperar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Coletar mensagens": {
+      "main": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar texto separado": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salvar tool calls": {
+      "main": [
+        [
+          {
+            "node": "Buscar atributos do contato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usou tools?": {
+      "main": [
+        [
+          {
+            "node": "Salvar tool calls",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar atributos do contato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar atributos do contato": {
+      "main": [
+        [
+          {
+            "node": "Calcular tipo da resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular tipo da resposta": {
+      "main": [
+        [
+          {
+            "node": "Tipo da resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tipo da resposta": {
+      "main": [
+        [
+          {
+            "node": "Formatar texto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Formatar SSML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gravando...": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar áudio": {
+      "main": [
+        [
+          {
+            "node": "Limpar status atendimento1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quebrar e enviar mensagens": {
+      "main": [
+        [
+          {
+            "node": "Limpar status atendimento1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar janelas disponiveis": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preferencia audio texto": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reagir mensagem": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Formatar SSML",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Formatar texto",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar status atendimento": {
+      "main": [
+        [
+          {
+            "node": "Agente já terminou de responder?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resetar status atendimento": {
+      "main": [
+        [
+          {
+            "node": "Limpar fila de mensagens1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpar status atendimento": {
+      "main": [
+        [
+          {
+            "node": "Output inválido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output válido?": {
+      "main": [
+        [
+          {
+            "node": "Usou tools?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Limpar status atendimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar arquivo": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar texto": {
+      "main": [
+        [
+          {
+            "node": "Quebrar e enviar mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar SSML": {
+      "main": [
+        [
+          {
+            "node": "Gravando...",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refletir": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem recebida": {
+      "main": [
+        [
+          {
+            "node": "Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar alerta de cancelamento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar agendamento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancelar agendamento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar agendamentos do contato": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Secretária v3": {
+      "main": [
+        [
+          {
+            "node": "Output válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar agendamento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bloquear status atendimento": {
+      "main": [
+        [
+          {
+            "node": "Limpar fila de mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar imóveis": {
+      "ai_tool": [
+        [
+          {
+            "node": "Secretária v3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrever audio1": {
+      "main": [
+        [
+          {
+            "node": "Enfileirar mensagem.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert text to speech": {
+      "main": [
+        [
+          {
+            "node": "Enviar áudio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar mensagem?2": {
+      "main": [
+        [
+          {
+            "node": "Tipo de mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e32e463d-1f43-4e8a-8952-c13db4fd9b30",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "804f959bf0baa67211818af2a797c5ade8f8a77114897a659f9c7f0bd55eb3c4"
+  },
+  "id": "uTh7OBeIi6UeXv67",
+  "tags": []
+}
