@@ -2,8 +2,14 @@ import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase - Using Service Role Key or Anon Key
 // Service Role is preferred for backend operations to bypass RLS if configured
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Placeholders evitam que o createClient lance "supabaseUrl is required"
+// durante o build da Vercel caso as env vars ainda não estejam definidas.
+// Em runtime, com as variáveis corretas, funciona normalmente.
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    'placeholder-key';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export interface Property {
