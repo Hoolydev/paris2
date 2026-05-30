@@ -1,7 +1,3 @@
 {
-    "$schema": "https://openapi.vercel.sh/vercel.json",
-    "functions": {
-        "app/api/webhook/chatwoot/route.ts": { "maxDuration": 60 },
-        "app/api/agent/test/route.ts": { "maxDuration": 60 }
-    }
+    "$schema": "https://openapi.vercel.sh/vercel.json"
 }
